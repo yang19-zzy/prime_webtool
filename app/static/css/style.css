@@ -1,0 +1,419 @@
+body {
+    font-family: "Roboto", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 350; /* <weight>: Use a value from 100 to 900  */
+    font-style: normal;
+    font-variation-settings: "wdth" 100;
+  }
+
+body {
+    background-color: #FFFFFF;
+}
+
+/* Sidebar navigation layout */
+.sidenav {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 220px;
+  background-color: #f8f9fa;
+  overflow-x: hidden;
+  padding-top: 20px;
+  transition: transform 0.3s ease;
+  z-index: 1000;
+}
+
+.sidenav .menu__link {
+  margin: 5px 20px;
+  padding: 5px 10px;
+  border: 2;
+}
+
+nav a {
+  text-decoration: none;
+  color: inherit;
+}
+
+nav a:visited {
+  color: inherit;
+  text-decoration: none;
+}
+
+.sidenav .menu__link:hover {
+  background-color: rgb(224, 221, 221);
+  border-radius: 8px;
+}
+
+.sidenav .closebtn {
+  font-size: 20px;
+  cursor: pointer;
+  text-align: right;
+  padding: 0 20px;
+}
+
+.sidenav h2{
+  margin: 10px;
+}
+
+.main-container {
+  margin-left: 200px;
+  transition: margin-left 0.3s ease;
+  padding-left: 5%;
+  padding-right: 5%;
+}
+
+.menu-toggle {
+  position: fixed;
+  top: 10px;
+  left: 180px;
+  width: 30px;
+  z-index: 1100;
+  /* background: #444; */
+  /* color: white; */
+  color: #444;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  /* margin: 0 10px 10px auto; */
+  display: block;
+  /* aspect-ratio: 1 / 1; */
+}
+
+/* Toggled state */
+.sidenav:not(.open) {
+  transform: translateX(-220px);
+}
+
+.main-container.shifted {
+  margin-left: 0;
+}
+
+
+
+/* General form styling */
+legend {
+  font-size: small;
+}
+
+form {
+  max-width:800px;
+  margin: auto;
+  padding: 10px;
+  border: 1px solid #dbdbdb;
+  border-radius: 8px;
+  background-color: #FFFFFF;
+  color: #31333F;
+}
+
+.form-element {
+  padding-top: 10px;
+}
+
+.form_owner {
+  color: gray;
+  display:  flex;
+  align-items: center;
+  gap: 8px;
+  font-size: small;
+}
+.form-owner label {
+  font-weight: bold;
+  margin: 0;
+}
+
+/* Form metadata section with two-column layout */
+#form-metadata {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+#form-metadata .choices,
+#form-metadata .choices__inner {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Label styling */
+.form-element label {
+  display: block;
+  font-weight: normal;
+  font-size: small;
+  margin-bottom: 5px;
+}
+
+/* Input and select fields */
+input, select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #dbdbdb;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+  background-color: #F0F2F6;
+}
+
+#device-container {
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  margin-bottom: 8px;
+}
+
+/* Device row container: single line if possible */
+.device-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  margin-top: 10px;
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+  /* border-radius: 5px; */
+  background-color: #fff;
+  overflow-x: hidden;
+  width: 100%;
+  box-sizing: border-box;
+  justify-content: space-between;
+}
+
+/* Adjust input/select width inside device-row */
+.device-row div {
+  flex: 1 1 0;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* Buttons */
+button {
+  /* margin-top: 15px; */
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.add-btn {
+  background-color: #3cbe5a;
+  color: white;
+}
+
+.remove-btn {
+  width: 5;
+  height: 5;
+  background-color: #ea7e88;
+  color: white;
+}
+
+button:hover {
+  transition: 5ms;
+  background-color: #bfbfbf;
+}
+
+.add-btn:hover {
+  transition: 5ms;
+  background-color: #28a745;
+}
+
+.remove-btn:hover {
+  transition: 5ms;
+  background-color: #dc3545;
+}
+
+/* Data-Viewer!!!!!!!!!!!!! */
+/* .table-selection-row,  */
+.table-selection-row-element {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.table-selection-row > .top {
+  display: flex;
+  flex-wrap: nowrap;
+  width: 100%;
+  justify-content: space-evenly;
+  align-items: end;
+  border: none;
+  padding: none;
+  margin: none;
+}
+
+.table-selection-row > .bottom {
+  width: 100%;
+  display: block;
+  box-sizing: border-box;
+}
+
+.table-selection-row > .top > div,
+.table-selection-row > .bottom > div {
+  flex: 1 1 auto;
+  min-width: 200px;
+  margin: 5px 5px 0;
+  /* border: 1px solid red; */
+  /* margin-right: 5px; */
+}
+
+/* 
+.table-selection-row > .top > button {
+  margin-left: 10px;
+} */
+
+.multi-select, .table-selection {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #f6f7fa;
+  font-size: 1rem;
+  line-height: 1.2;
+  appearance: none;       /* Removes native UI in some browsers */
+  overflow-y: scroll;
+  overflow-x: scroll;
+}
+
+.multi-select option {
+  padding: 0.5rem;
+}
+
+
+/* Modal */
+.modal {
+  position: fixed;
+  z-index: 1000;
+  padding-top: 5%;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  /* overflow-y: scroll; */
+  background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 50%;
+  border-radius: 8px;
+  max-height: 80vh;              /* Limit modal height */
+  overflow-y: auto;              /* Scroll content inside modal */
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;        /* Ensure button stays below */
+}
+
+.modal-checkbox-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  padding: 5px;
+}
+
+.modal-checkbox-row input {
+  width: 13px;
+}
+
+.modal-checkbox-row:hover {
+  background-color: #e0dfdfd7;
+  border-radius: 5px;
+  transition: 5ms;
+}
+
+/* Choices for data viewer */
+.choices__list--multiple {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;  
+}
+
+#viewer-selection-container {
+  margin-bottom: 8px;
+}
+
+#viewer-selection-container .choices {
+  width: 100%;
+
+}
+#viewer-selection-container .choices__input, 
+#viewer-selection-container .choices__inner, 
+#viewer-selection-container .choices__list {
+  pointer-events: none;
+  background-color: #f8f8f8;
+  box-sizing: border-box;
+}
+
+#viewer-selection-container .choices__inner {
+  /* border: solid red; */
+  min-height: auto;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+
+/* Table Viewer */
+#viewer-main {
+  padding: 25px;
+}
+
+
+/* Validator Container */
+#validator-container {
+  display: flex;
+  flex-direction: column;
+}
+
+#validator-container .validation-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 3fr 1fr;
+  align-items: center;
+  /* margin: 5px; */
+  padding: 5px;
+}
+
+#validator-container .validation-row:hover {
+  /* background-color: #e3e3e3b8; */
+  box-shadow: 3px 3px 15px #4947479a;
+  border-radius: 5px;
+  transition: 0.1s;
+}
+
+#validator-container .has-data {
+  margin-left: 2px;
+  margin-right: 2px;
+  background-color: #e5e9fbee;
+  border-radius: 5px;
+  padding: 0 10px;
+}
+
+.validation-row-element {
+  font-size: small;
+}
+
+.validation-row-element span {
+  font-size: medium;
+}
+
+/* Responsive Design */
+@media (max-width: 530px) {
+  #form-metadata {
+   grid-template-columns: 1fr; /* Stack in one column */
+  }
+  
+  .device-row {
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .device-row input,
+  .device-row select {
+    width: 100%;
+  }
+}
