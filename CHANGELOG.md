@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented here.
 
-## [v0.1.0] - 2025-04-28
+## [v0.9.0] - 2025-04-28
 ### Added
 - Initial commit: Flask app, metrics viewer, local-only setup
 
