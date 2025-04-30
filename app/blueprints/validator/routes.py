@@ -8,12 +8,12 @@ import json
 @validator_bp.route('/')
 def validate():
     if not flask_session.get('user_info'):
-        return jsonify({'error': 'Unauthorized, no user-info, need login'}), 401
-    user_info = flask_session['user_info']
-
-    user_role = UserRole.query.filter_by(user_id=user_info['user_id']).first().role
-    flask_session['user_role'] = user_role
-    print(user_role)
+        flask_session['user_info'] = None
+    else:
+        user_info = flask_session['user_info']
+        user_role = UserRole.query.filter_by(user_id=user_info['user_id']).first().role
+        flask_session['user_role'] = user_role
+        print(user_role)
     return render_template('test_validator.html', title="Test Validator")
 
 @validator_bp.route('/get_unvalidated_forms', methods=['GET'])
