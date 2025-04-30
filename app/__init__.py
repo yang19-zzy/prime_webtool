@@ -9,7 +9,7 @@ from app.models import *
 from app.utils.s3_fetcher import connect_s3
 from authlib.integrations.flask_client import OAuth
 
-from app.extensions import db, oauth, set_google, set_s3, set_s3_bucket
+from app.extensions import db, oauth, set_google, set_s3, set_s3_bucket, migrate
 
 from app.blueprints.main import main_bp
 from app.blueprints.auth import auth_bp
@@ -57,6 +57,7 @@ def create_app(test_config=None):
     
     # Initialize database
     db.init_app(app)
+    migrate.init_app(app, db)
 
     # Initialize Redis
     redis_client = Redis(
@@ -82,4 +83,6 @@ def create_app(test_config=None):
 
 
     print(app.url_map)
+    print("=== FINAL SQLAlchemy DB URI ===")
+    print(app.config['SQLALCHEMY_DATABASE_URI'])
     return app

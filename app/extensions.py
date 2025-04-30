@@ -1,10 +1,11 @@
 # app/extensions.py
 from flask_sqlalchemy import SQLAlchemy
 from authlib.integrations.flask_client import OAuth
-
+from flask_migrate import Migrate
 
 
 db = SQLAlchemy()
+migrate = Migrate()
 oauth = OAuth()
 _google = None
 _s3 = None
