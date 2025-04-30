@@ -1,51 +1,50 @@
-# config.py
 import os
-import toml
 from datetime import timedelta
+from dotenv import load_dotenv
 
-# Optional: Load config.toml if not in production
-ENVIRONMENT = os.getenv("FLASK_ENV", "development")
-config = toml.load("config.toml") if ENVIRONMENT != "production" else {}
+load_dotenv()  # Loads from .env file if present
 
-# --- Utility: Nested get with fallback ---
-def conf(section, key, fallback=None):
-    return os.getenv(
-        key.upper(),
-        config.get(section, {}).get(key, fallback)
-    )
+# prod-dev switch
+ENVIRONMENT = os.environ.get("FLASK_ENV", "development")
 
-# --- Google OAuth ---
-GOOGLE_CLIENT_ID = conf("google", "CLIENT_ID")
-GOOGLE_CLIENT_SECRET = conf("google", "CLIENT_SECRET")
-GOOGLE_REDIRECT_URI = conf("google", "REDIRECT_URI")
-GOOGLE_AUTH_URI = conf("google", "AUTH_URI")
-GOOGLE_TOKEN_URI = conf("google", "TOKEN_URI")
-GOOGLE_DISCOVERY_URL = conf("google", "DISCOVERY_URL")
-GOOGLE_SCOPES = config.get("google", {}).get("SCOPES", [])
-
-# --- AWS ---
-AWS_ACCESS_KEY_ID = conf("aws", "ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = conf("aws", "SECRET_ACCESS_KEY")
-AWS_REGION = conf("aws", "DEFAULT_REGION")
-AWS_BUCKET_NAME = conf("aws", "BUCKET_NAME")
-WHITELIST_SECRET_NAME = conf("aws", "WHITELIST_SECRET_NAME")
-
-# --- DB ---
-SQLALCHEMY_DATABASE_URI = conf("localhost_db", "URL", "sqlite:///default.db")
+# SQLAlchemy / DB
+SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SQLALCHEMY_ENGINE_OPTIONS = {
     "execution_options": {"schema_translate_map": {None: "backend"}}
 }
 
-# --- Flask session ---
-SESSION_TYPE = "filesystem"
-SECRET_KEY = os.getenv("SECRET_KEY", "dev")
-PERMANENT_SESSION_LIFETIME = timedelta(minutes=int(os.getenv("SESSION_LIFETIME_MINUTES", "300")))
-SESSION_COOKIE_NAME = "session"
-SESSION_COOKIE_SECURE = ENVIRONMENT == "production"
+# Redis
+REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
+REDIS_PORT = int(os.environ.get("REDIS_PORT", 6379))
+REDIS_DB = int(os.environ.get("REDIS_DB", 0))
+REDIS_TIMEOUT = int(os.environ.get("REDIS_TIMEOUT", 1800))
 
-# --- Redis ---
-REDIS_HOST = conf("redis", "HOST", "localhost")
-REDIS_PORT = conf("redis", "PORT", 6379)
-REDIS_DB = conf("redis", "DB", 0)
-REDIS_TIMEOUT = conf("redis", "TIMEOUT", 1800)
+# Flask session
+SECRET_KEY = os.environ.get("SECRET_KEY", "dev")
+SESSION_COOKIE_NAME = "session"
+PERMANENT_SESSION_LIFETIME = timedelta(
+    minutes=int(os.environ.get("SESSION_LIFETIME_MINUTES", 300))
+)
+SESSION_COOKIE_SECURE = os.environ.get("FLASK_ENV") == "production"
+SESSION_TYPE = "filesystem"
+
+# Google OAuth
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
+GOOGLE_AUTH_URI = os.environ.get("GOOGLE_AUTH_URI")
+GOOGLE_TOKEN_URI = os.environ.get("GOOGLE_TOKEN_URI")
+GOOGLE_DISCOVERY_URL = os.environ.get("GOOGLE_DISCOVERY_URL")
+GOOGLE_SCOPES = os.environ.get("GOOGLE_SCOPES", "").split()
+GOOGLE_REDIRECT_URI = (
+    os.environ.get("GOOGLE_REDIRECT_URI_PROD")
+    if ENVIRONMENT == "production"
+    else os.environ.get("GOOGLE_REDIRECT_URI_DEV")
+)
+
+# AWS
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+AWS_REGION = os.environ.get("AWS_REGION")
+AWS_BUCKET_NAME = os.environ.get("AWS_BUCKET_NAME")
+WHITELIST_SECRET_NAME = os.environ.get("WHITELIST_SECRET_NAME")

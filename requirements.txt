@@ -1,0 +1,36 @@
+# required for lightweight images
+setuptools
+wheel
+dotenv
+
+Flask
+Flask-Cors
+Flask-Login
+Flask-Migrate
+Flask-Session
+Flask-SQLAlchemy
+Flask-WTF
+gunicorn
+
+SQLAlchemy
+psycopg2-binary
+
+redis
+requests
+Authlib
+boto3
+s3fs
+pandas
+pyarrow
+
+dash
+plotly
+
+openpyxl  # <-- for Excel export
+
+# optional: Google APIs
+google-api-core
+google-api-python-client
+google-auth
+google-auth-httplib2
+google-auth-oauthlib
