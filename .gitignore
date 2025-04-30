@@ -1,0 +1,34 @@
+# Environment and secrets
+.env
+.venv
+.secrets
+token.json
+
+# Configuration files
+config.toml
+config.toml.bak
+
+# Python-related
+*.pyc
+__pycache__
+*_DONOTUSE.py
+test*.py
+
+# JSON files
+*.json
+
+# Database
+db_init_data
+
+# Archive files and directories
+archive/
+archive
+
+# Nginx-related
+*.key
+*.crt
+nginx.conf
+certs/
+
+# Other
+.DS_store
