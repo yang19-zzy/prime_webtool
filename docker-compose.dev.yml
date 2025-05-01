@@ -2,6 +2,8 @@ services:
   postgres:
     volumes:
       - /home/ec2-user/data/postgres:/var/lib/postgresql/data
+    env_file:
+      - .env.dev
   web:
     environment:
       - FLASK_ENV=staging

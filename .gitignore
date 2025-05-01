@@ -1,5 +1,5 @@
 # Environment and secrets
-.env
+.env*
 .venv
 .secrets
 token.json
@@ -19,6 +19,7 @@ test*.py
 
 # Database
 db_init_data
+*.sql
 
 # Archive files and directories
 archive/
@@ -27,7 +28,6 @@ archive
 # Nginx-related
 *.key
 *.crt
-nginx.conf
 certs/
 
 # Other

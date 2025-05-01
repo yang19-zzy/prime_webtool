@@ -2,15 +2,14 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     command: flask run --host=0.0.0.0 --port=5000
     volumes:
       - .:/app
-      - ./config/config.toml:/app/config/config.toml:ro
     ports:
       - "4399:5000" # maps host 4399 --> container 5000
     depends_on:
-      - db
+      - postgres
       - redis
     environment:
       - FLASK_ENV=development
