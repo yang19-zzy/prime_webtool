@@ -13,7 +13,7 @@ services:
       - redis
     environment:
       - FLASK_ENV=development
-      - DATABASE_URL=postgresql://dev:dev@db:5432/prime_web_test
+      - DATABASE_URL=postgresql://dev:dev@postgres:5432/prime_web_test
       - REDIS_URL=redis://redis:6379/0
     networks:
       - backend
