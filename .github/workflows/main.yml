@@ -1,0 +1,20 @@
+name: Create GitHub Release on Tag
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger only on tags starting with 'v'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
