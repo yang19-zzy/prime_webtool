@@ -24,7 +24,10 @@ def load_user(user_id):
     return None
 
 
-
+@app.route("/set-session")
+def set_session():
+    flask_session["init"] = "yes"
+    return "Session set"
 
 if __name__ == "__main__":
     app.run(debug=True, port=8000)
