@@ -3,7 +3,7 @@ events {}
 http {
     server {
         listen 80 default_server;
-        server_name prime.kines.umich.edu;
+        server_name {{ server_name }};
 
         # Redirect all HTTP to HTTPS
         return 301 https://$host$request_uri;
@@ -11,13 +11,13 @@ http {
 
     server {
         listen 443 ssl;
-        server_name prime.kines.umich.edu;
+        server_name {{ server_name }};
 
-        ssl_certificate     /etc/ssl/certs/nginx.crt;
-        ssl_certificate_key /etc/ssl/private/nginx.key;
+        ssl_certificate     {{ ssl_certificate_path }};
+        ssl_certificate_key {{ ssl_certificate_key_path }};
 
         location / {
-            proxy_pass http://web:5000;
+            proxy_pass {{ proxy_pass_url }};
             proxy_set_header Host $host;
             proxy_set_header Cookie $http_cookie;
             proxy_set_header X-Real-IP $remote_addr;

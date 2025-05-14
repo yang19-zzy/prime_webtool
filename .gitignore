@@ -30,6 +30,7 @@ archive
 *.key
 *.crt
 certs/
+*.conf
 
 # Other
 .DS_store
