@@ -4,6 +4,7 @@ from flask import Flask
 from config import *
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from app.models import *
 from app.utils.s3_fetcher import connect_s3
@@ -26,7 +27,7 @@ def create_app(test_config=None):
     app = Flask(__name__)
     app.config.from_object('config')
     
-    CORS(app, supports_credentials=True, origins=["http://localhost:8000", "https://your-production-domain.com"])
+    CORS(app, supports_credentials=True, origins=["http://localhost:8000", "https://prime.kines.umich.edu"])
     
     # Initialize extensions
     ## Google OAuth
@@ -73,6 +74,9 @@ def create_app(test_config=None):
         print(f"Redis connection failed: {e}")
     app.extensions['redis'] = redis_client
 
+
+    # Initialize ProxyFix middleware
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1, x_port=1, x_proto=1)
 
     # Register Blueprints
     app.register_blueprint(main_bp)

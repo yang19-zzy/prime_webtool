@@ -7,6 +7,7 @@ token.json
 # Configuration files
 config.toml
 config.toml.bak
+*.dev.*
 
 # Python-related
 *.pyc
@@ -32,3 +33,8 @@ certs/
 
 # Other
 .DS_store
+.elasticbeanstalk
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
