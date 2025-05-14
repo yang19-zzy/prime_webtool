@@ -8,8 +8,8 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 RUN openssl req -batch -x509 -nodes -days 365 -newkey rsa:2048 \
-    -keyout /etc/ssl/private/nginx.key \
-    -out /etc/ssl/certs/nginx.crt
+    -keyout ./nginx/certs/selfsigned.key \
+    -out ./nginx/certs/selfsigned.crt
 
 COPY . .
 

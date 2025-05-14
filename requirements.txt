@@ -2,6 +2,7 @@
 setuptools
 wheel
 dotenv
+openssl
 
 Flask
 Flask-Cors
