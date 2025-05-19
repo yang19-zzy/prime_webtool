@@ -15,7 +15,7 @@ services:
     networks:
       - backend
     env_file:
-      - .env.dev
+      - .env.prime.dev
 
  
   redis:

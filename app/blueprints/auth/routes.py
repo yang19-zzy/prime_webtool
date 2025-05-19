@@ -37,7 +37,7 @@ def auth_logout():
     flask_session.clear()
     response = make_response(redirect(next_url))
     response.delete_cookie('logged_in')
-    return 
+    return response
 
 
 @auth_bp.route('/db_test', methods=['GET'])

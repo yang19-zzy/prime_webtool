@@ -5,12 +5,14 @@ from app.extensions import get_s3, get_s3_bucket, get_redis, db
 from app.utils.data_parser import prefix_to_json
 from app.utils.s3_fetcher import get_s3_data, list_prefix, get_session_data
 from app.utils.storage_tool import get_redis
+from app.utils.merge_q_generator import merge_q_generator
 from app.models import TableColumns, MergeHistory
 from collections import defaultdict
 import pandas as pd
 import hashlib
 import time
 import json
+from sqlalchemy import text
 
 
 
@@ -51,24 +53,24 @@ def get_table_options():
 
 
 
-@viewer_bp.route('/data', methods=['POST', 'GET'])
-def get_tables_from_s3():
-    if not flask_session.get('user_info'):
-        return jsonify({'error': 'Unauthorized'}), 401
-    # data = request.get_json()
-    # print("Received viewer request:", data)
-    # process your S3 fetch here...
-    schema = request.args.get('schema')
-    table = request.args.get('table')
-    print('schema:', schema)
-    print('table:', table)
+# @viewer_bp.route('/data', methods=['POST', 'GET'])
+# def get_tables_from_s3():
+#     if not flask_session.get('user_info'):
+#         return jsonify({'error': 'Unauthorized'}), 401
+#     # data = request.get_json()
+#     # print("Received viewer request:", data)
+#     # process your S3 fetch here...
+#     schema = request.args.get('schema')
+#     table = request.args.get('table')
+#     print('schema:', schema)
+#     print('table:', table)
 
-    # if schema-table is stored in session
-    session_table_key = flask_session.get(f'table_data_{schema}-{table}')
-    df = get_s3_data(s3=get_s3(), bucket=get_s3_bucket(), schema=schema, table=table)
-    data = df.to_dict(orient='records')
-    flask_session[session_table_key] = data
-    return jsonify({"message": "Data fetched successfully", "data": data})
+#     # if schema-table is stored in session
+#     session_table_key = flask_session.get(f'table_data_{schema}-{table}')
+#     df = get_s3_data(s3=get_s3(), bucket=get_s3_bucket(), schema=schema, table=table)
+#     data = df.to_dict(orient='records')
+#     flask_session[session_table_key] = data
+#     return jsonify({"message": "Data fetched successfully", "data": data})
 
 @viewer_bp.route('/merge', methods=['POST', 'GET'])
 def merge_data():
@@ -78,7 +80,6 @@ def merge_data():
     # Get the data from the request
     data = request.get_json()
     print("Received merge request:", data)
-
 
     # key_raw = f"{str(time.time())}_{str(data)}"
     key_raw = str(data) #reuse the key the the same set of selected tables retrieved again in the same session
@@ -91,24 +92,12 @@ def merge_data():
     if df_merged:
         return jsonify({"message": "Data already merged", "key": key})
 
-    # get data from S3
-    df_list = list()
-    for key, cols in data.items():
-        schema, table = key.replace("table_data_", "").split('-metrics-')
-        schema = schema + "-metrics"
-        df = get_s3_data(s3=get_s3(), bucket=get_s3_bucket(), schema=schema, table=table)  #TO-DO: modify this to get data from Aurora database
-        df = df.loc[:, cols]
-        df_list.append(df)
-
-    for df in df_list:
-        df['visit_date'] = pd.to_datetime(df['visit_date'], errors='coerce')
-        df['visit_date'] = df['visit_date'].dt.strftime('%Y-%m-%d').astype(str)
-
-        try:
-            df_merged = pd.merge(df_merged, df, how='left', on=['participant_ID','visit_date','visit_type']) if df_merged is not None else df
-        except Exception as e:
-            print(f"Error merging dataframes: {e}")
-            df_merged = pd.merge(df_merged, df, how='left', on=['participant_ID','visit_date']) if df_merged is not None else df
+    q = merge_q_generator(data, db)
+    if not q:
+        return jsonify({"error": "No data to merge"}), 400
+    
+    print("Generated SQL Join Query:", q)
+    df_merged = pd.read_sql(text(q), con=db.engine)
 
     # Save the merged dataframe to Redis
     r.set(f'merged_{key}', json.dumps(df_merged.to_json(orient='records')))
