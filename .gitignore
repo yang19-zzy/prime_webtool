@@ -29,7 +29,7 @@ archive
 # Nginx-related
 *.key
 *.crt
-certs/
+certs*/
 *.conf
 
 # Other

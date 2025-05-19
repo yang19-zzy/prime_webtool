@@ -1,6 +1,7 @@
 import os
 from datetime import timedelta
 from dotenv import load_dotenv
+from sqlalchemy.engine import URL
 
 load_dotenv()  # Loads from .env file if present
 
@@ -8,7 +9,14 @@ load_dotenv()  # Loads from .env file if present
 ENVIRONMENT = os.environ.get("FLASK_ENV", "development")
 
 # SQLAlchemy / DB
-SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
+# SQLALCHEMY_DATABASE_URI = URL.create("postgresql", username=os.getenv("AURORA_PG_USER"), password=os.getenv("AURORA_PG_PW"), host=os.getenv("AURORA_PG_HOST"), port=os.getenv("AURORA_PG_PORT"), database=os.getenv("AURORA_PG_DB"))
+SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(
+    os.getenv("AURORA_PG_USER"),
+    os.getenv("AURORA_PG_PW"),
+    os.getenv("AURORA_PG_HOST"),
+    os.getenv("AURORA_PG_PORT"),
+    os.getenv("AURORA_PG_DB"),
+)
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SQLALCHEMY_ENGINE_OPTIONS = {
     "execution_options": {"schema_translate_map": {None: "backend"}}

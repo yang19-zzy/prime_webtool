@@ -11,35 +11,13 @@ services:
     expose:
       - "5000"
     depends_on:
-      - postgres
       - redis
-    environment:
-      - FLASK_ENV=development
-      - DATABASE_URL=postgresql://dev:dev@postgres:5432/prime_web_test
-      - REDIS_URL=redis://redis:6379/0
     networks:
       - backend
     env_file:
       - .env
 
-  postgres:
-    image: postgres:14
-    restart: always
-    environment:
-      POSTGRES_USER: dev
-      POSTGRES_PASSWORD: dev
-      POSTGRES_DB: prime_web_test
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - backend
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "dev"]
-      interval: 10s
-      timeout: 30s
-      retries: 5
-    ports:
-      - "5432:5432"
+
 
   redis:
     image: redis:7
@@ -64,7 +42,6 @@ services:
       - backend
 
 volumes:
-  postgres_data:
   redis_data:
 
 networks:

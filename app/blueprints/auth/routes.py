@@ -1,7 +1,8 @@
 # app/blueprints/auth/routes.py
 from . import auth_bp
-from flask import request, redirect, url_for, session as flask_session, make_response
-from app.extensions import get_google
+from flask import request, redirect, url_for, session as flask_session, make_response, jsonify
+from app.extensions import get_google, db
+from sqlalchemy import text
 
 @auth_bp.route('/login')
 def auth_login():
@@ -36,4 +37,13 @@ def auth_logout():
     flask_session.clear()
     response = make_response(redirect(next_url))
     response.delete_cookie('logged_in')
-    return response
+    return 
+
+
+@auth_bp.route('/db_test', methods=['GET'])
+def db_test():
+    try:
+        db.session.execute(text("SELECT 1"))
+        return jsonify({'status': 'Aurora connected successfully'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

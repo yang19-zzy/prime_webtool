@@ -16,6 +16,7 @@ class TableColumns(db.Model):
     __tablename__ = 'table_columns'
     __table_args__ = (
         UniqueConstraint('table_name', 'column_name', 'data_source', name='uq_table_columns'),
+        {'schema': 'backend'}
     )
 
     id = db.Column(db.Integer, primary_key=True)
@@ -26,6 +27,7 @@ class TableColumns(db.Model):
 
 class MergeHistory(db.Model):
     __tablename__ = 'merge_history'
+    __table_args__ = ({'schema': 'backend'})
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.String(100), nullable=False)
@@ -35,7 +37,7 @@ class MergeHistory(db.Model):
 
 class TrackerForm(db.Model):
     __tablename__ = 'tracker_form'
-    __table_args__ = ()
+    __table_args__ = ({'schema': 'backend'})
 
     id = db.Column(db.Integer, primary_key=True)
     form_owner = db.Column(db.String(100), nullable=False)
@@ -52,6 +54,7 @@ class UserRole(db.Model):
     __tablename__ = 'user_role'
     __table_args__ = (
         UniqueConstraint('user_id', 'role', name='user_role_pkey'),
+        {'schema': 'backend'}
     )
 
     id = db.Column(db.Integer, primary_key=True)

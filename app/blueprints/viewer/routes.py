@@ -18,6 +18,7 @@ import json
 def data_viewer():
     return render_template('data_viewer.html')
 
+
 @viewer_bp.route('/options', methods=['GET'])
 def get_data_viewer_options():
     '''get data source options from S3 bucket and get the table names'''
@@ -41,7 +42,7 @@ def get_table_options():
     if not flask_session.get('user_info'):
         return jsonify({'error': 'Unauthorized'}), 401
 
-    options = TableColumns.query.order_by(TableColumns.data_source, TableColumns.table_name).all()
+    options = TableColumns.query.order_by(TableColumns.id, TableColumns.data_source, TableColumns.table_name).all()
     grouped = defaultdict(lambda: defaultdict(list))
     for opt in options:
         grouped[opt.data_source][opt.table_name].append(opt.column_name)
@@ -95,7 +96,7 @@ def merge_data():
     for key, cols in data.items():
         schema, table = key.replace("table_data_", "").split('-metrics-')
         schema = schema + "-metrics"
-        df = get_s3_data(s3=get_s3(), bucket=get_s3_bucket(), schema=schema, table=table)
+        df = get_s3_data(s3=get_s3(), bucket=get_s3_bucket(), schema=schema, table=table)  #TO-DO: modify this to get data from Aurora database
         df = df.loc[:, cols]
         df_list.append(df)
 

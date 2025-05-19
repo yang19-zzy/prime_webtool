@@ -27,7 +27,7 @@ def create_app(test_config=None):
     app = Flask(__name__)
     app.config.from_object('config')
     
-    CORS(app, supports_credentials=True, origins=["http://localhost:8000", "https://prime.kines.umich.edu"])
+    CORS(app, supports_credentials=True, origins=["http://localhost", "https://prime.kines.umich.edu"])
     
     # Initialize extensions
     ## Google OAuth
