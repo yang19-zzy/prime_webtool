@@ -15,3 +15,7 @@ All notable changes to this project will be documented here.
 ### Changed
 - Updated folder structure for container support
 - Updated `config.py` to support dynamic env configs
+
+## [v1.1.0] - 2025-05-10
+### Changed
+- Updated database connection from localhost to AWS Aurora
