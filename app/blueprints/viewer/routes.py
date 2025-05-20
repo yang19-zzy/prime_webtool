@@ -98,6 +98,7 @@ def merge_data():
     
     print("Generated SQL Join Query:", q)
     df_merged = pd.read_sql(text(q), con=db.engine)
+    df_merged = df_merged.astype(str)  # Convert all columns to string type
 
     # Save the merged dataframe to Redis
     r.set(f'merged_{key}', json.dumps(df_merged.to_json(orient='records')))
