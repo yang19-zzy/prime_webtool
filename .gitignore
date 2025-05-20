@@ -39,3 +39,6 @@ certs*/
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+# dev files
+*.dev
