@@ -8,6 +8,7 @@ db = SQLAlchemy()
 migrate = Migrate()
 oauth = OAuth()
 _google = None
+_google_flow = None
 _s3 = None
 _s3_bucket = None
 _redis_client = None
@@ -20,6 +21,15 @@ def get_google():
     if _google is None:
         raise ValueError("Google client has not been set.")
     return _google
+
+def set_google_flow(client):
+    global _google_gmail
+    _google_gmail = client
+
+def get_google_flow():
+    if _google_gmail is None:
+        raise ValueError("Google Gmail client has not been set.")
+    return _google_gmail
 
 def set_s3(client):
     global _s3

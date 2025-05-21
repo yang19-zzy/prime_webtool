@@ -371,7 +371,7 @@ button:hover {
 
 #validator-container .validation-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 3fr 1fr;
+  grid-template-columns: 1fr 1fr 2fr 0.5fr 0.5fr;
   align-items: center;
   /* margin: 5px; */
   padding: 5px;

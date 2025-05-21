@@ -36,6 +36,7 @@ function initializeTrackerList() {
 function createValidationRow(container, item) {
     const form_id = item.form_id;
     const form_data = item.data.form_data;
+    const form_owner = item.data.form_owner;
 
     const row = document.createElement('div');
     row.id = form_id;
@@ -44,9 +45,12 @@ function createValidationRow(container, item) {
     const subjectId = createValidationRowElement(form_data.metadata.subject_id, "Subject ID", "subject-id validation-row-element");
     const testDate = createValidationRowElement(form_data.metadata.test_date, "Test Date", "test-date validation-row-element");
     const testType = createValidationRowElement(form_data.metadata.test_type, "Test Type(s)", "test-type validation-row-element");
+    const submitBy = createValidationRowElement(form_owner, "Submit By", "form-owner validation-row-element");
     const confirmBtn = createValidationRowBtn(form_id, "btn confirm-btn");
 
-    row.append(subjectId, testDate, testType, confirmBtn);
+    // console.log(form_data);
+    // console.log(item);
+    row.append(subjectId, testDate, testType, submitBy, confirmBtn);
     container.appendChild(row);
 }
 

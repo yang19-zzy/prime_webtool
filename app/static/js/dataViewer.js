@@ -4,7 +4,9 @@ let rowIdCounter = 1;
 
 // main
 document.addEventListener("DOMContentLoaded", function () {
-    initializeDataViewer();
+    (async () => {
+        await initializeDataViewer();
+    })();
 });
 
 
