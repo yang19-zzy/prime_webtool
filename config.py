@@ -31,13 +31,13 @@ REDIS_DB = int(os.environ.get("REDIS_DB", 0))
 REDIS_TIMEOUT = int(os.environ.get("REDIS_TIMEOUT", 1800))
 
 # Flask session
+# SESSION_COOKIE_NAME = "session"
+# SESSION_COOKIE_SECURE = os.environ.get("FLASK_ENV") == "production"
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev")
-SESSION_COOKIE_NAME = "session"
-PERMANENT_SESSION_LIFETIME = timedelta(
-    minutes=int(os.environ.get("SESSION_LIFETIME_MINUTES", 300))
-)
-SESSION_COOKIE_SECURE = os.environ.get("FLASK_ENV") == "production"
+SESSION_PERMANET = False  # Set to True if you want sessions to persist across server restarts
 SESSION_TYPE = "filesystem"
+PERMANENT_SESSION_LIFETIME = timedelta(minutes=int(os.environ.get("SESSION_LIFETIME_MINUTES", 45)))
+LAB_NAME = os.environ.get("LAB_NAME", "PRIME")
 
 # Google OAuth
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")

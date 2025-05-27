@@ -1,14 +1,26 @@
 document.addEventListener("DOMContentLoaded", function () {
+    const loginBtn = document.getElementById("login-btn");
+    if (loginBtn) {
+        loginBtn.addEventListener('click', function() {
+            redirectToLogin();
+        })
+    }
     initializeForm();
     setupFormSubmission();
 });
 
 function initializeForm() {
-    const userLoggedIn = get_cookie("logged_in=");
-    if (userLoggedIn != "true" || !userLoggedIn) {
+    // const userLoggedIn = get_cookie("logged_in=");
+    // if (userLoggedIn != "true" || !userLoggedIn) {
+    //     console.warn("User not logged in. Skipping fetchWithAuth.");
+    //     return;
+    // }
+    const response = fetchWithAuth('/auth/session-check');
+    if (!response || response.status === 401) {
         console.warn("User not logged in. Skipping fetchWithAuth.");
         return;
     }
+
     const data = getSessionData("form-selections");
     if (data) {
         addRow(data.device); //initial row
@@ -19,7 +31,7 @@ function initializeForm() {
         .then(async res => {
             const result = await res.json();
             if (!result) return;
-            saveCookie(result, "select_options");
+            // saveCookie(result, "select_options");
             saveSessionData("form-selections", result);
             addRow(result.device); //initial row
             populateTestTypeOptions(result.test_type);
@@ -27,7 +39,7 @@ function initializeForm() {
         })
         .catch(error => console.error("Error fetching select options:", error));
     }
-    
+
 }
 
 function populateTestTypeOptions(testTypes) {
@@ -66,9 +78,15 @@ function populateVisitNumber(visitNumbers) {
 }
 
 function setupFormSubmission() {
-    const userLoggedIn = get_cookie("logged_in=");
-    if (userLoggedIn != "true") {
-        console.warn("User not logged in. Skipping setupFormSubmission.");
+    // const userLoggedIn = get_cookie("logged_in=");
+    // if (userLoggedIn != "true") {
+    //     console.warn("User not logged in. Skipping setupFormSubmission.");
+    //     return;
+    // }
+
+    const response = fetchWithAuth('/auth/session-check');
+    if (!response || response.status === 401) {
+        console.warn("User not logged in. Skipping fetchWithAuth.");
         return;
     }
     const form = document.querySelector("form");
@@ -83,6 +101,7 @@ function setupFormSubmission() {
         const jsonData = parseFormToJSON();
         submitFormData(jsonData);
     });
+
 }
 
 function submitFormData(jsonData) {

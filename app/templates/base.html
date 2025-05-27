@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRIME Webtool - {% block title %}{% endblock %}</title>
+    <title>{{ lab_name }} Webtool - {% block title %}{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
@@ -41,7 +41,7 @@
     
     <div class="main-container">
         <main>
-            <header><h1 class="">PRIME Lab Webtool</h1></header>
+            <header><h1 class="">{{ lab_name }} Lab Webtool</h1></header>
             {% block content %}{% endblock %}
         </main>
     </div>

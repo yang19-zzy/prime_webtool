@@ -42,3 +42,4 @@ certs*/
 
 # dev files
 *.dev
+docker-compose.dev.yml.ec2

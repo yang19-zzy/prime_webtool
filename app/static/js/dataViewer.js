@@ -4,6 +4,12 @@ let rowIdCounter = 1;
 
 // main
 document.addEventListener("DOMContentLoaded", function () {
+    const loginBtn = document.getElementById("login-btn");
+    if (loginBtn) {
+        loginBtn.addEventListener('click', function() {
+            redirectToLogin();
+        })
+    }
     (async () => {
         await initializeDataViewer();
     })();
@@ -12,27 +18,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // functions
 function initializeDataViewer() {
-    const userLoggedIn = get_cookie("logged_in=");
-    if (userLoggedIn !== "true" || !userLoggedIn) {
-        console.warn("User not logged in. Skipping fetchWithAuth.");
-        return;
-    }
-    const data = getSessionData('data-viewer-select-options');
 
-    if (data) {
-        addTableSelectionRow(data); // initial row
-    } else {
-        fetchWithAuth("/data_viewer/table_options")
-            .then(async response  => {
-                const result = await response.json();
-                if (!result || !result.data_source) return;
-                saveSessionData('data-viewer-select-options', result.data_source);
-                addTableSelectionRow(result.data_source); // initial row
-            })
-            .catch(error => console.error("Error fetching select options:", error));
-    }
-    
-        
+        const response = fetchWithAuth('/auth/session-check');
+        if (!response || response.status === 401) {
+            console.warn("User not logged in. Skipping fetchWithAuth.");
+            return;
+        }
+
+        const data = getSessionData('data-viewer-select-options');
+        if (data) {
+            addTableSelectionRow(data); // initial row
+        } else {
+            fetchWithAuth("/data_viewer/table_options")
+                .then(async response  => {
+                    const result = await response.json();
+                    if (!result || !result.data_source) return;
+                    saveSessionData('data-viewer-select-options', result.data_source);
+                    addTableSelectionRow(result.data_source); // initial row
+                })
+                .catch(error => console.error("Error fetching select options:", error));
+        }
+
 }
 
 

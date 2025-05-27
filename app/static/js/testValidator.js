@@ -1,13 +1,26 @@
 document.addEventListener("DOMContentLoaded", function () {
+    const loginBtn = document.getElementById("login-btn");
+    if (loginBtn) {
+        loginBtn.addEventListener('click', function() {
+            redirectToLogin();
+        })
+    }
     initializeTrackerList();
 });
 
 function initializeTrackerList() {
     const validContainer = document.getElementById("validator-container");
-    validContainer.innerHTML = "<p class='loading-msg'>Loading records...</p>";
+    // validContainer.innerHTML = "<p class='loading-msg'>Loading records...</p>";
 
-    const userLoggedIn = get_cookie("logged_in=");
-    if (userLoggedIn !== "true") {
+    // const userLoggedIn = get_cookie("logged_in=");
+    // if (userLoggedIn !== "true") {
+    //     console.warn("User not logged in. Skipping fetchWithAuth.");
+    //     validContainer.innerHTML = "<p class='info-msg'>Please log in to view validation requests.</p>";
+    //     return;
+    // }
+
+    const response = fetchWithAuth('/auth/session-check');
+    if (!response || response.status === 401) {
         console.warn("User not logged in. Skipping fetchWithAuth.");
         validContainer.innerHTML = "<p class='info-msg'>Please log in to view validation requests.</p>";
         return;

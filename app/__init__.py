@@ -30,6 +30,11 @@ def create_app(test_config=None):
     app = Flask(__name__)
     app.config.from_object('config')
     
+    #add LAB_NAME
+    @app.context_processor
+    def inject_lab_name():
+        return dict(lab_name=app.config.get('LAB_NAME', 'PRIME'))
+
     CORS(app, supports_credentials=True, origins=["http://localhost", "https://prime.kines.umich.edu"])
     
     # Initialize extensions
