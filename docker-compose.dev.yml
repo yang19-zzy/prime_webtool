@@ -33,7 +33,7 @@ services:
       - "443:443"
       - "80:80"
     volumes:
-      - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/nginx.dev.prime.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/certs/selfsigned.crt:/etc/ssl/certs/nginx.crt:ro
       - ./nginx/certs/selfsigned.key:/etc/ssl/private/nginx.key:ro
     depends_on:
