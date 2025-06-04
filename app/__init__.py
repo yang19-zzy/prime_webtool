@@ -102,6 +102,13 @@ def create_app(test_config=None):
     app.register_blueprint(validator_bp)
 
 
+    # force end db session
+    @app.teardown_appcontext
+    def shutdown_session(exception=None):
+        db.session.remove()
+        if exception:
+            print(f"Exception during request: {exception}")
+
     print(app.url_map)
     # print("=== FINAL SQLAlchemy DB URI ===")
     # print(app.config['SQLALCHEMY_DATABASE_URI'])

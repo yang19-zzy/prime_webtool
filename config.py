@@ -9,20 +9,24 @@ load_dotenv()  # Loads from .env file if present
 ENVIRONMENT = os.environ.get("FLASK_ENV", "development")
 
 # SQLAlchemy / DB
-# SQLALCHEMY_DATABASE_URI = URL.create("postgresql", username=os.getenv("AURORA_PG_USER"), password=os.getenv("AURORA_PG_PW"), host=os.getenv("AURORA_PG_HOST"), port=os.getenv("AURORA_PG_PORT"), database=os.getenv("AURORA_PG_DB"))
-SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(
-    os.getenv("AURORA_PG_USER"),
-    os.getenv("AURORA_PG_PW"),
-    os.getenv("AURORA_PG_HOST"),
-    os.getenv("AURORA_PG_PORT"),
-    os.getenv("AURORA_PG_DB"),
+# SQLALCHEMY_DATABASE_URI = URL.create("postgresql", username=os.getenv("AWS_RDS_PG_USER"), password=os.getenv("AWS_RDS_PG_PW"), host=os.getenv("AWS_RDS_PG_HOST"), port=os.getenv("AWS_RDS_PG_PORT"), database=os.getenv("AWS_RDS_PG_DB"))
+SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://{}:{}@{}:{}/{}?sslmode=require".format(
+    os.getenv("AWS_RDS_PG_USER"),
+    os.getenv("AWS_RDS_PG_PW"),
+    os.getenv("AWS_RDS_PG_HOST"),
+    os.getenv("AWS_RDS_PG_PORT"),
+    os.getenv("AWS_RDS_PG_DB"),
 )
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SQLALCHEMY_ENGINE_OPTIONS = {
-    "execution_options": {"schema_translate_map": {None: "backend"}}
+    "execution_options": {"schema_translate_map": {None: "backend"}},
+    "pool_pre_ping": os.getenv("AWS_RDS_PG_POOL_PRE_PING", True),
+    "pool_recycle": int(os.environ.get("AWS_RDS_PG_POOL_RECYCLE", 1800)),
+    "pool_size": int(os.environ.get("AWS_RDS_PG_POOL_SIZE", 5)),
+    "pool_timeout": int(os.environ.get("AWS_RDS_PG_POOL_TIMEOUT", 30)),
 }
-SQLALCHEMY_DATABASE_POOL_SIZE = int(os.environ.get("AURORA_PG_POOL_SIZE", 5))
-SQLALCHEMY_DATABASE_POOL_RECYCLE = int(os.environ.get("AURORA_PG_POOL_RECYCLE", 1800))
+SQLALCHEMY_DATABASE_POOL_SIZE = int(os.environ.get("AWS_RDS_PG_POOL_SIZE", 5))
+SQLALCHEMY_DATABASE_POOL_RECYCLE = int(os.environ.get("AWS_RDS_PG_POOL_RECYCLE", 1800))
 
 # Redis
 REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
