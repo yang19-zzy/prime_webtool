@@ -5,9 +5,7 @@ from collections import defaultdict
 
 
 def load_form_options():
-    options = FormOptions.query.order_by(
-        FormOptions.field_name, FormOptions.item_num
-    ).all()
+    options = FormOptions.query.filter_by(active=True).order_by(FormOptions.field_name, FormOptions.item_num).all()
     grouped = defaultdict(list)
     device_map = defaultdict(list)
 
