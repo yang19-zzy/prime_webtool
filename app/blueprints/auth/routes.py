@@ -109,7 +109,7 @@ def db_test():
 
 @auth_bp.route('/session-check')
 def session_check():
-    if "user_id" in flask_session:
+    if "user_id" in flask_session and "user_role" in flask_session:
         return jsonify({'logged_in': True, 'user_id': flask_session['user_id'], 'user_role': flask_session['user_role']})
     else:
         return jsonify({'logged_in': False}), 401

@@ -10,7 +10,8 @@ class FormOptions(db.Model):
     field_name = db.Column(db.String(100), nullable=False)
     item_num = db.Column(db.Integer, nullable=True)
     value = db.Column(db.String(255), nullable=False)
-
+    active = db.Column(db.Boolean)
+    
 
 class TableColumns(db.Model):
     __tablename__ = 'table_columns'
