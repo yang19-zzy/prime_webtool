@@ -15,7 +15,11 @@ def merge_q_generator(data, db):
     base_key, base_cols = table_items[0]
     base_table = base_key.replace("table_data_", "").replace('-metrics-','_').lower()
     base_alias = "t0"
-    select_clauses = [f"""{base_alias}."{col}" AS {base_table}__{col}""" for col in base_cols]
+    select_clauses = [
+        f"""CAST({base_alias}."{col}" AS TEXT) AS "{base_table}__{col}" """ if col == 'visit_date'
+        else f"""{base_alias}."{col}" AS "{base_table}__{col}" """
+        for col in base_cols
+    ]
     join_clauses = ""
     aliases = {base_key: base_alias}
     alias_counter = 1
@@ -26,7 +30,12 @@ def merge_q_generator(data, db):
         aliases[key] = alias
         alias_counter += 1
 
-        select_clauses += [f"""{alias}."{col}" AS {table}__{col}""" for col in cols if col not in ['participant_ID', 'visit_date', 'visit_type']]
+        cols = [col for col in cols if col not in ['participant_ID', 'visit_date', 'visit_type']]
+        select_clauses += [
+            f"""CAST({alias}."{col}" AS TEXT) AS "{table}__{col}" """ if col == "visit_date" or col == "visit_datetime"
+            else f"""{alias}."{col}" AS "{table}__{col}" """ 
+            for col in cols
+        ]
 
         join_clause = f"""
         LEFT JOIN metrics.{table} {alias}

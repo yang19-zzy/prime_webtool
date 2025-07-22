@@ -6,7 +6,6 @@ from app.utils.option_loader import load_form_options
 from app.models import TrackerForm
 from app.extensions import db
 from . import tracker_bp
-# from app.config import DEVICES, BODY_PARTS, TEST_TYPES, VISIT_NUMS
 
 @tracker_bp.route('/')
 def test_tracker():
@@ -32,10 +31,17 @@ def submit_data():
     print("Metadata:", metadata)
     print("Devices:", devices)
 
-    # Example: Send an email notification
+    # Send an email notification
     form_owner = metadata.get('form_owner') or flask_session['user_info'].get('user_id')
     subject_id = metadata.get('subject_id')
     print(form_data)
+
+    send_email(
+        recipient="zzyang@umich.edu",
+        subject="New Form Submitted [Test]!!!",
+        message_text=f"Test Tracker: {subject_id} has been submitted by {form_owner}",
+        credentials=flask_session['google_credentials'],
+    )
 
     # Save the form data to the database
     new_form = TrackerForm(
@@ -45,12 +51,6 @@ def submit_data():
     )
     db.session.add(new_form)
     db.session.commit()
-
-    send_email(
-        recipient="zzyang@umich.edu",
-        subject="New Form Submitted [Test]!!!",
-        message_text=f"Test Tracker: {subject_id} has been submitted by {form_owner}"
-    )
 
     # Return success message as JSON
     return jsonify({'message': 'Form data submitted successfully!'})

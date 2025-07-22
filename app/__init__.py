@@ -10,7 +10,10 @@ from app.models import *
 from app.utils.s3_fetcher import connect_s3
 from authlib.integrations.flask_client import OAuth
 
-from app.extensions import db, oauth, set_google, set_s3, set_s3_bucket, migrate
+from app.extensions import db, oauth, set_google, get_google, set_google_flow, set_s3, set_s3_bucket, migrate
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
 
 from app.blueprints.main import main_bp
 from app.blueprints.auth import auth_bp
@@ -27,6 +30,11 @@ def create_app(test_config=None):
     app = Flask(__name__)
     app.config.from_object('config')
     
+    #add LAB_NAME
+    @app.context_processor
+    def inject_lab_name():
+        return dict(lab_name=app.config.get('LAB_NAME', 'PRIME'))
+
     CORS(app, supports_credentials=True, origins=["http://localhost", "https://prime.kines.umich.edu"])
     
     # Initialize extensions
@@ -40,6 +48,14 @@ def create_app(test_config=None):
         client_kwargs={"scope": app.config['GOOGLE_SCOPES']},
     )
     set_google(google_client)
+
+    ## Google 
+    flow = InstalledAppFlow.from_client_config(
+        client_config = app.config['GOOGLE_CLIENT_CONFIG'],
+        scopes = app.config['GOOGLE_SCOPES'],
+        redirect_uri = app.config['GOOGLE_REDIRECT_URI']
+    )
+    set_google_flow(flow)
     
     ## S3 connection
     s3_client = connect_s3(
@@ -86,7 +102,15 @@ def create_app(test_config=None):
     app.register_blueprint(validator_bp)
 
 
+    # force end db session
+    @app.teardown_appcontext
+    def shutdown_session(exception=None):
+        db.session.remove()
+        if exception:
+            print(f"Exception during request: {exception}")
+
     print(app.url_map)
-    print("=== FINAL SQLAlchemy DB URI ===")
-    print(app.config['SQLALCHEMY_DATABASE_URI'])
+    # print("=== FINAL SQLAlchemy DB URI ===")
+    # print(app.config['SQLALCHEMY_DATABASE_URI'])
+    # print("Google Config", app.config['GOOGLE_CLIENT_CONFIG'])
     return app

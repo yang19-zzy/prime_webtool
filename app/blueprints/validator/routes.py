@@ -10,10 +10,10 @@ def validate():
     if not flask_session.get('user_info'):
         flask_session['user_info'] = None
     else:
-        user_info = flask_session['user_info']
-        user_role = UserRole.query.filter_by(user_id=user_info['user_id']).first().role
-        flask_session['user_role'] = user_role
-        print(user_role)
+        # user_info = flask_session['user_info']
+        # user_role = UserRole.query.filter_by(user_id=flask_session['user_id']).first().role
+        # flask_session['user_role'] = user_role
+        print(flask_session['user_role'])
     return render_template('test_validator.html', title="Test Validator")
 
 

@@ -39,3 +39,7 @@ certs*/
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+# dev files
+*.dev
+docker-compose.dev.yml.ec2

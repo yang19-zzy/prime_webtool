@@ -15,11 +15,11 @@ async function fetchWithAuth(url, options = {}) {
         });
         console.log(response.status);
         if (response.status === 401) {
-            console.warn("Session expired. Redirecting to login...");
-            document.cookie = "logged_in=false";
-            const returnUrl = encodeURIComponent(window.location.href);
-            const loginUrl = `/auth/login?next=${returnUrl}&provider=google`;
-            window.location.href = loginUrl;
+            // console.warn("Session expired. Redirecting to login...");
+            // document.getElementsByTagName('main-content').innerHTML = "Session expired. Redirecting to login...";
+            // const returnUrl = encodeURIComponent(window.location.href);
+            // const loginUrl = `/auth/login?next=${returnUrl}&provider=google`;
+            // window.location.href = loginUrl;
             return;
         }
 
@@ -33,4 +33,11 @@ async function fetchWithAuth(url, options = {}) {
     } catch (error) {
         console.error("Fetch failed:", error);
     }
+}
+
+
+function redirectToLogin() {
+    const returnUrl = encodeURIComponent(window.location.href);
+    const loginUrl = `/auth/login?next=${returnUrl}&provider=google`;
+    window.location.href = loginUrl;
 }
