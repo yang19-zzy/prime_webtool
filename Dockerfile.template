@@ -1,0 +1,15 @@
+# Use your base image
+FROM <base_image>
+
+WORKDIR <workdir>
+
+# Add any necessary packages
+RUN <install_packages_command>
+
+COPY <requirements_file> .
+RUN <upgrade_pip_command>
+RUN <install_requirements_command>
+
+COPY <source_code> .
+
+CMD [<entrypoint_command>]

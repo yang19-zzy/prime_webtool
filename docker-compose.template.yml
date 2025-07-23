@@ -1,0 +1,32 @@
+version: '<COMPOSE_VERSION>'
+services:
+  web:
+    image: '<WEB_IMAGE>'
+    container_name: '<WEB_CONTAINER_NAME>'
+    ports:
+      - '<WEB_PORT>:5000'
+    environment:
+      - DB_USER=<DB_USER>
+      - DB_PASS=<DB_PASS>
+      - SECRET_KEY=<SECRET_KEY>
+      # Add other environment variables as needed
+    volumes:
+      - '<WEB_VOLUME>:/app'
+    depends_on:
+      - db
+    command: '<WEB_COMMAND>'
+
+  db:
+    image: '<DB_IMAGE>'
+    container_name: '<DB_CONTAINER_NAME>'
+    ports:
+      - '<DB_PORT>:3306'
+    environment:
+      - MYSQL_ROOT_PASSWORD=<MYSQL_ROOT_PASSWORD>
+      - MYSQL_DATABASE=<MYSQL_DATABASE>
+      - MYSQL_USER=<MYSQL_USER>
+      - MYSQL_PASSWORD=<MYSQL_PASSWORD>
+    volumes:
+      - '<DB_VOLUME>:/var/lib/mysql'
+
+# Add more services or networks as needed
