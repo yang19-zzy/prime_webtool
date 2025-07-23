@@ -37,7 +37,7 @@ def submit_data():
     print(form_data)
 
     send_email(
-        recipient="zzyang@umich.edu",
+        recipient="zzyang@umich.edu,acmelvin@umich.edu",
         subject="New Form Submitted [Test]!!!",
         message_text=f"Test Tracker: {subject_id} has been submitted by {form_owner}",
         credentials=flask_session['google_credentials'],
