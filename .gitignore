@@ -42,4 +42,5 @@ certs*/
 
 # dev files
 *.dev
-docker-compose.dev.yml.ec2
+docker-compose*.yml
+!docker-compose.template.yml
