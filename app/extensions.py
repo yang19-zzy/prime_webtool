@@ -31,23 +31,23 @@ def get_google_flow():
         raise ValueError("Google Gmail client has not been set.")
     return _google_gmail
 
-def set_s3(client):
-    global _s3
-    _s3 = client
+# def set_s3(client):
+#     global _s3
+#     _s3 = client
 
-def get_s3():
-    if _s3 is None:
-        raise ValueError("S3 client has not been set.")
-    return _s3
+# def get_s3():
+#     if _s3 is None:
+#         raise ValueError("S3 client has not been set.")
+#     return _s3
 
-def set_s3_bucket(bucket):
-    global _s3_bucket
-    _s3_bucket = bucket
+# def set_s3_bucket(bucket):
+#     global _s3_bucket
+#     _s3_bucket = bucket
 
-def get_s3_bucket():
-    if _s3_bucket is None:
-        raise ValueError("S3 bucket has not been set.")
-    return _s3_bucket
+# def get_s3_bucket():
+#     if _s3_bucket is None:
+#         raise ValueError("S3 bucket has not been set.")
+#     return _s3_bucket
 
 def set_redis(client):
     global _redis_client

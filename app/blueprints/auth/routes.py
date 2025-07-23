@@ -5,6 +5,7 @@ from app.extensions import get_google_flow, db
 from app.models import User, UserRole
 from sqlalchemy import text, inspect
 import requests
+import os
 
 @auth_bp.route('/login')
 def auth_login():
@@ -86,6 +87,8 @@ def auth_callback():
     except Exception as e:
         current_app.logger.error(f"Login error: {e}")
         db.session.rollback()
+        user, user_info, user_role = None, None, None
+        flask_session.clear()
         return render_template('login_error.html'), 400
 
 @auth_bp.route('/logout')
@@ -102,7 +105,7 @@ def auth_logout():
 def db_test():
     try:
         db.session.execute(text("SELECT 1"))
-        return jsonify({'status': 'Aurora connected successfully'})
+        return jsonify({'env': os.getenv("FLASK_ENV"), 'status': 'Database connected successfully'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

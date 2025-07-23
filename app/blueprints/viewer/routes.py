@@ -1,9 +1,10 @@
 # blueprints/viewer/routes.py
 from . import viewer_bp
 from flask import render_template, request, redirect, url_for, session as flask_session, make_response, jsonify, current_app
-from app.extensions import get_s3, get_s3_bucket, get_redis, db
+# from app.extensions import get_s3, get_s3_bucket, 
+from app.extensions import get_redis, db
 from app.utils.data_parser import prefix_to_json
-from app.utils.s3_fetcher import get_s3_data, list_prefix, get_session_data
+# from app.utils.s3_fetcher import get_s3_data, list_prefix, get_session_data
 from app.utils.storage_tool import get_redis
 from app.utils.merge_q_generator import merge_q_generator
 from app.models import TableColumns, MergeHistory
@@ -21,23 +22,23 @@ def data_viewer():
     return render_template('data_viewer.html')
 
 
-@viewer_bp.route('/options', methods=['GET'])
-def get_data_viewer_options():
-    '''get data source options from S3 bucket and get the table names'''
-    if not flask_session.get('user_info'):
-        return jsonify({'error': 'Unauthorized'}), 401
+# @viewer_bp.route('/options', methods=['GET'])
+# def get_data_viewer_options():
+#     '''get data source options from S3 bucket and get the table names'''
+#     if not flask_session.get('user_info'):
+#         return jsonify({'error': 'Unauthorized'}), 401
 
-    if not get_s3():
-        return jsonify({'error': 'S3 connection failed'}), 500
+#     if not get_s3():
+#         return jsonify({'error': 'S3 connection failed'}), 500
     
-    try:
-        prefixes = list_prefix(s3=get_s3(), bucket=get_s3_bucket())
-        print('prefixes:', prefixes)
-        sources = [prefix.strip('/') for prefix in prefixes]
-        sources = prefix_to_json(sources)
-        return jsonify(sources)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+#     try:
+#         prefixes = list_prefix(s3=get_s3(), bucket=get_s3_bucket())
+#         print('prefixes:', prefixes)
+#         sources = [prefix.strip('/') for prefix in prefixes]
+#         sources = prefix_to_json(sources)
+#         return jsonify(sources)
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
     
 @viewer_bp.route('/table_options', methods=['POST', 'GET'])
 def get_table_options():

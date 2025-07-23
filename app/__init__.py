@@ -10,7 +10,7 @@ from app.models import *
 from app.utils.s3_fetcher import connect_s3
 from authlib.integrations.flask_client import OAuth
 
-from app.extensions import db, oauth, set_google, get_google, set_google_flow, set_s3, set_s3_bucket, migrate
+from app.extensions import db, oauth, set_google, get_google, set_google_flow, migrate
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
@@ -57,17 +57,17 @@ def create_app(test_config=None):
     )
     set_google_flow(flow)
     
-    ## S3 connection
-    s3_client = connect_s3(
-        key=app.config['AWS_ACCESS_KEY_ID'],
-        secret=app.config['AWS_SECRET_ACCESS_KEY'],
-        region=app.config['AWS_REGION']
-    )
-    set_s3(s3_client)
+    # ## S3 connection
+    # s3_client = connect_s3(
+    #     key=app.config['AWS_ACCESS_KEY_ID'],
+    #     secret=app.config['AWS_SECRET_ACCESS_KEY'],
+    #     region=app.config['AWS_REGION']
+    # )
+    # set_s3(s3_client)
 
-    ## S3 bucket name - this is used in blueprints
-    s3_bucket_ = app.config['AWS_BUCKET_NAME']
-    set_s3_bucket(s3_bucket_)
+    # ## S3 bucket name - this is used in blueprints
+    # s3_bucket_ = app.config['AWS_BUCKET_NAME']
+    # set_s3_bucket(s3_bucket_)
 
     # Initialize Dash app
     init_dash_viewer(app)

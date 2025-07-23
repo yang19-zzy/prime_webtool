@@ -10,23 +10,29 @@ ENVIRONMENT = os.environ.get("FLASK_ENV", "development")
 
 # SQLAlchemy / DB
 # SQLALCHEMY_DATABASE_URI = URL.create("postgresql", username=os.getenv("AWS_RDS_PG_USER"), password=os.getenv("AWS_RDS_PG_PW"), host=os.getenv("AWS_RDS_PG_HOST"), port=os.getenv("AWS_RDS_PG_PORT"), database=os.getenv("AWS_RDS_PG_DB"))
-SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://{}:{}@{}:{}/{}?sslmode=require".format(
-    os.getenv("AWS_RDS_PG_USER"),
-    os.getenv("AWS_RDS_PG_PW"),
-    os.getenv("AWS_RDS_PG_HOST"),
-    os.getenv("AWS_RDS_PG_PORT"),
-    os.getenv("AWS_RDS_PG_DB"),
-)
-SQLALCHEMY_TRACK_MODIFICATIONS = False
-SQLALCHEMY_ENGINE_OPTIONS = {
-    "execution_options": {"schema_translate_map": {None: "backend"}},
-    "pool_pre_ping": os.getenv("AWS_RDS_PG_POOL_PRE_PING", True),
-    "pool_recycle": int(os.environ.get("AWS_RDS_PG_POOL_RECYCLE", 1800)),
-    "pool_size": int(os.environ.get("AWS_RDS_PG_POOL_SIZE", 5)),
-    "pool_timeout": int(os.environ.get("AWS_RDS_PG_POOL_TIMEOUT", 30)),
-}
-SQLALCHEMY_DATABASE_POOL_SIZE = int(os.environ.get("AWS_RDS_PG_POOL_SIZE", 5))
-SQLALCHEMY_DATABASE_POOL_RECYCLE = int(os.environ.get("AWS_RDS_PG_POOL_RECYCLE", 1800))
+if ENVIRONMENT == "production":
+    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://{}:{}@{}:{}/{}?sslmode=require".format(
+        os.getenv("AWS_RDS_PG_USER"),
+        os.getenv("AWS_RDS_PG_PW"),
+        os.getenv("AWS_RDS_PG_HOST"),
+        os.getenv("AWS_RDS_PG_PORT"),
+        os.getenv("AWS_RDS_PG_DB"),
+    )
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "execution_options": {"schema_translate_map": {None: "backend"}},
+        "pool_pre_ping": os.getenv("AWS_RDS_PG_POOL_PRE_PING", True),
+        "pool_recycle": int(os.environ.get("AWS_RDS_PG_POOL_RECYCLE", 1800)),
+        "pool_size": int(os.environ.get("AWS_RDS_PG_POOL_SIZE", 5)),
+        "pool_timeout": int(os.environ.get("AWS_RDS_PG_POOL_TIMEOUT", 30)),
+    }
+    SQLALCHEMY_DATABASE_POOL_SIZE = int(os.environ.get("AWS_RDS_PG_POOL_SIZE", 5))
+    SQLALCHEMY_DATABASE_POOL_RECYCLE = int(os.environ.get("AWS_RDS_PG_POOL_RECYCLE", 1800))
+else:
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///./test.db")
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "execution_options": {"schema_translate_map": {None: "backend"}}
+    }
 
 # Redis
 REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
@@ -66,9 +72,9 @@ GOOGLE_CLIENT_CONFIG = {
     }
 }
 
-# AWS
-AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-AWS_REGION = os.environ.get("AWS_REGION")
-AWS_BUCKET_NAME = os.environ.get("AWS_BUCKET_NAME")
-WHITELIST_SECRET_NAME = os.environ.get("WHITELIST_SECRET_NAME")
+# # AWS
+# AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+# AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+# AWS_REGION = os.environ.get("AWS_REGION")
+# AWS_BUCKET_NAME = os.environ.get("AWS_BUCKET_NAME")
+# WHITELIST_SECRET_NAME = os.environ.get("WHITELIST_SECRET_NAME")
