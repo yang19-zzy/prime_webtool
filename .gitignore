@@ -43,6 +43,7 @@ certs*/
 # dev files
 *.dev
 docker-compose*.yml
+<<<<<<< HEAD
 !docker-compose.template.yml
 
 #Docker
@@ -52,3 +53,6 @@ Dockerfile*
 #session
 flask_session/*
 flask_session
+=======
+!docker-compose.template.yml
+>>>>>>> 9d6336b (modified)
