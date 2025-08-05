@@ -15,12 +15,7 @@
 {% block content %}
 <div>
     <h2>Tools</h2>
-    {% if not session.user_info %}
 
-        <p>Please log in first.</p>
-        <a href="{{ url_for('auth.auth_login', next=request.url, provider='google') }}"><button type="button" class="btn login-btn" id="login-btn">Log in</button></a>
-
-    {% else %}
     <div id="tools-container">
         <div id="tools-pdf-container" class="sub-tool-container">
             <div class="sub-tool-container-item title">
@@ -36,6 +31,5 @@
         </div>
     </div>
     
-    {% endif %}
 </div>
 {% endblock %}

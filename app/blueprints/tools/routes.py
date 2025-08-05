@@ -12,8 +12,8 @@ import requests
 @tools_bp.route('/')
 def data_tools():
     print('debugging----------:', flask_session.get('user_info'))
-    if not flask_session.get('user_info'):
-        return redirect(url_for('auth.auth_login'))
+    # if not flask_session.get('user_info'):
+    #     return redirect(url_for('auth.auth_login'))
     return render_template('tools.html', title="Test Tools")
 
 
