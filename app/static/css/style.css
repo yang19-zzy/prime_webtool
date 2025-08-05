@@ -417,3 +417,54 @@ button:hover {
     width: 100%;
   }
 }
+
+
+
+/* Tools */
+.sub-tool-container {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  /* margin: 10px; */
+  padding: 12px;
+  /* max-width: 600px; */
+  background-color: #f9f9f9;
+}
+
+.sub-tool-container-item.title {
+  cursor: pointer;
+  /* font-weight: bold; */
+  padding: 8px;
+}
+
+.sub-tool-container-item.title .tool-title {
+  margin: 0;
+}
+
+.sub-tool-container-item.file-form {
+  display: none;
+  margin-top: 10px;
+}
+
+.btn.submit-btn {
+  padding: 5px;
+  border: none;
+  border-radius: 5px;
+  background-color: #1976d2;
+  color: white;
+  cursor: pointer;
+}
+
+.btn.submit-btn:hover {
+  background-color: #1565c0;
+}
+
+.sub-tool-container-item.file-form form {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* spacing between input and button */
+  max-width: none;
+}
+
+input[type="file"] {
+  flex-grow: 1; /* allow input to take up available space */
+}

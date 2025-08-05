@@ -1,6 +1,9 @@
-// document.getElementById('pdf-upload').addEventListener('change', function(){
-//     const fileName = this.files[0] ? this.files[0].name : '';
-//     console.log(fileName);
-//     document.getElementById('file-name').textContent = fileName;
-// });
+document.addEventListener('DOMContentLoaded', function () {
+  const titleBlock = document.querySelector('.sub-tool-container-item.title');
+  const formBlock = document.querySelector('.sub-tool-container-item.file-form');
 
+  titleBlock.addEventListener('click', function () {
+    const isVisible = formBlock.style.display === 'block';
+    formBlock.style.display = isVisible ? 'none' : 'block';
+  });
+});
