@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Tools{% endblock %}
+
+{% block scripts %}
+<script type = "text/javascript" src = "{{ url_for('static', filename = 'js/toolsUI.js') }}" ></script>
+{% endblock %}
+
+{% block logout_btn %}
+{% if session.user_info %}
+<a href="{{ url_for('auth.auth_logout') }}"><button type="button" class="btn logout-btn menu__link" id="logout-btn" onclick="logoutAndStay()">Log out</button></a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div>
+    <h2>Tools</h2>
+    {% if not session.user_info %}
+
+        <p>Please log in first.</p>
+        <a href="{{ url_for('auth.auth_login', next=request.url, provider='google') }}"><button type="button" class="btn login-btn" id="login-btn">Log in</button></a>
+
+    {% else %}
+    <div id="tools-container">
+        <div id="tools-pdf-container" class="sub-tool-container">
+            <div class="sub-tool-container-item title">
+                <p class="tool-title">Dynamometer PDF Data Extraction</p>
+            </div>
+            <div class="sub-tool-container-item file-form">
+                <form action="{{ url_for('tools.extract_pdf') }}" method="POST" enctype="multipart/form-data">
+                    <!-- <label for="pdf-upload">Choose PDFs to upload</label>                 -->
+                    <input type="file" id="pdf-upload" name="pdf-upload" accept=".pdf" multiple>
+                    <button class="btn submit-btn" id="extract-pdf-btn">Extract Data & Download</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    {% endif %}
+</div>
+{% endblock %}

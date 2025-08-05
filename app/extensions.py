@@ -12,6 +12,7 @@ _google_flow = None
 _s3 = None
 _s3_bucket = None
 _redis_client = None
+# _lambda_client = None
 
 def set_google(client):
     global _google
@@ -30,6 +31,15 @@ def get_google_flow():
     if _google_gmail is None:
         raise ValueError("Google Gmail client has not been set.")
     return _google_gmail
+
+# def set_lambda_client(client):
+#     global _lambda_client
+#     _lambda_client = client
+
+# def get_lambda_client():
+#     if _lambda_client is None:
+#         raise ValueError("Lambda client has not been set.")
+#     return _lambda_client
 
 # def set_s3(client):
 #     global _s3

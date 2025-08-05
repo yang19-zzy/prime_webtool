@@ -6,6 +6,16 @@ import pandas as pd
 from io import StringIO
 
 
+
+
+# ## Lambda connection
+# def connect_lambda(key, secret, region):
+#     """Initialize Lambda client."""
+#     return boto3.client('lambda', aws_access_key_id=key, aws_secret_access_key=secret, region_name=region)
+
+# lambda_client = connect_lambda()
+
+## S3 connection
 def connect_s3(key, secret, region):
     """Initialize S3 client."""
     return boto3.client('s3', aws_access_key_id=key, aws_secret_access_key=secret, region_name=region)
@@ -38,6 +48,8 @@ def get_s3_data(s3, bucket: str, schema: str, table: str) -> pd.DataFrame:
 
     return df.fillna('')  # Modify to return actual DataFrame when needed.
 
+
+## Whitelist Fetcher
 def get_secret(region_name, secret_name, access_key, secret_key):
     """Fetch the whitelist from AWS Secrets Manager."""
     # session = boto3.session.Session()

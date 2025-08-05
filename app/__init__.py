@@ -7,10 +7,10 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from app.models import *
-from app.utils.s3_fetcher import connect_s3
+# from app.utils.aws_tools import connect_lambda
 from authlib.integrations.flask_client import OAuth
 
-from app.extensions import db, oauth, set_google, get_google, set_google_flow, migrate
+from app.extensions import db, oauth, set_google, get_google, set_google_flow
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
@@ -20,6 +20,7 @@ from app.blueprints.auth import auth_bp
 from app.blueprints.tracker import tracker_bp
 from app.blueprints.viewer import viewer_bp
 from app.blueprints.validator import validator_bp
+from app.blueprints.tools import tools_bp
 
 from redis import Redis
 
@@ -69,12 +70,20 @@ def create_app(test_config=None):
     # s3_bucket_ = app.config['AWS_BUCKET_NAME']
     # set_s3_bucket(s3_bucket_)
 
+    # ## Lambda Function connection
+    # lambda_client = connect_lambda(
+    #     key=app.config['AWS_ACCESS_KEY_ID'],
+    #     secret=app.config['AWS_SECRET_ACCESS_KEY'],
+    #     region=app.config['AWS_REGION']
+    # )
+    # set_lambda_client(lambda_client)
+
     # Initialize Dash app
     init_dash_viewer(app)
     
     # Initialize database
     db.init_app(app)
-    migrate.init_app(app, db)
+    # migrate.init_app(app, db)
 
     # Initialize Redis
     redis_client = Redis(
@@ -100,6 +109,7 @@ def create_app(test_config=None):
     app.register_blueprint(viewer_bp)
     app.register_blueprint(tracker_bp)
     app.register_blueprint(validator_bp)
+    app.register_blueprint(tools_bp)
 
 
     # force end db session
