@@ -24,7 +24,7 @@
             <div class="sub-tool-container-item file-form">
                 <form action="{{ url_for('tools.extract_pdf') }}" method="POST" enctype="multipart/form-data">
                     <!-- <label for="pdf-upload">Choose PDFs to upload</label>                 -->
-                    <input type="file" id="pdf-upload" name="pdf-upload" accept=".pdf" multiple>
+                    <input type="file" id="pdf-upload" name="pdf-upload" accept=".pdf">
                     <button class="btn submit-btn" id="extract-pdf-btn">Extract Data & Download</button>
                 </form>
             </div>
