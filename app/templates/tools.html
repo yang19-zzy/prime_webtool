@@ -28,8 +28,37 @@
                     <button class="btn submit-btn" id="extract-pdf-btn">Extract Data & Download</button>
                 </form>
             </div>
+            {% if csv_data %}
+            <script>
+                // Auto-download the CSV and refresh the page after
+                const csvData = "{{ csv_data|safe }}";  // base64 string
+
+                const blob = new Blob([Uint8Array.from(atob(csvData), c => c.charCodeAt(0))], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'extracted_data.csv';
+                a.click();
+
+                setTimeout(() => {
+                    window.location.href = "{{ url_for('tools.data_tools') }}";  // hard refresh
+                }, 1000);
+            </script>
+            {% endif %}
         </div>
     </div>
     
 </div>
+{% endblock %}
+
+{% block error %}
+    {% if error %}
+    <div id="error-popup" class="popup-overlay">
+        <div class="popup-content">
+            <span class="close-btn" onclick="document.getElementById('error-popup').style.display='none'">&times;</span>
+            <p>{{ error }}</p>
+        </div>
+    </div>
+    {% endif %}
 {% endblock %}
