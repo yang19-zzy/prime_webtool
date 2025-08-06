@@ -1,5 +1,5 @@
 # app/blueprints/tools/routes.py
-from flask import render_template, request, session as flask_session, jsonify, url_for, redirect, send_file
+from flask import flash, render_template, request, session as flask_session, jsonify, url_for, redirect, send_file
 # from app.extensions import get_lambda_client
 from . import tools_bp
 import base64
@@ -11,66 +11,47 @@ import requests
 
 @tools_bp.route('/')
 def data_tools():
-    print('debugging----------:', flask_session.get('user_info'))
-    # if not flask_session.get('user_info'):
-    #     return redirect(url_for('auth.auth_login'))
-    return render_template('tools.html', title="Test Tools")
+    error = flask_session.pop('error', None)
+    csv_data = flask_session.pop('csv_data', None)
+    return render_template('tools.html', title="Tools", error=error, csv_data=csv_data)
 
 
 
 @tools_bp.route('/extract_pdf', methods=['POST'])
 def extract_pdf():
-    if 'pdf-upload' not in request.files:
-        return jsonify({"error": "No file part"}), 400
-    
-    file = request.files["pdf-upload"]
-    if file and file.filename.endswith('.pdf'):
+    try:
+        file = request.files.get('pdf-upload')
+        if not file or file.filename == '':
+            flask_session['error'] = "Invalid or missing PDF file."
+            return redirect(url_for('tools.data_tools'))
+
         file_bytes = file.read()
         encoded_pdf = base64.b64encode(file_bytes).decode('utf-8')
 
-        # payload = json.dumps({
-        #     "file_data": encoded_pdf,
-        #     "filename": file.filename
-        # })
-        # return jsonify({"message": "File received, processing...", "payload": payload}), 202
-
-        # lambda_client = get_lambda_client()
-        # lambda_response = lambda_client.invoke(
-        #     FunctionName='pdf_extractor',
-        #     InvocationType='RequestResponse',
-        #     Payload=json.dumps(payload).encode('utf-8')
-        # )
         lambda_url = os.environ.get('AWS_LAMBDA_PDF_EXTRACT')
-        print('Lambda URL:', lambda_url, "file:", file.filename)
         if not lambda_url:
-            return jsonify({"error": "Lambda URL not configured"}), 5
+            flask_session['error'] = "Lambda URL not configured."
+            return redirect(url_for('tools.data_tools'))
+
         lambda_response = requests.post(
-            lambda_url, 
+            lambda_url,
             json={"file_data": encoded_pdf, "filename": file.filename},
             headers={"Content-Type": "application/json"}
         )
 
         if lambda_response.status_code != 200:
-            return jsonify({"error": "Failed to invoke Lambda function", "details": lambda_response.text, "lambda_url": lambda_url}), 500
+            flask_session['error'] = "Failed to process file. Try again later."
+            return redirect(url_for('tools.data_tools'))
 
         result = lambda_response.json()
         csv_string = result.get('csv_data')
-        csv_bytes = base64.b64decode(csv_string)
-        return send_file(
-            io.BytesIO(csv_bytes),
-            mimetype='text/csv',
-            as_attachment=True,
-            download_name='extracted_data.csv'
-        )
-    
-    return jsonify({"error": "Invalid file type"}), 400
+        if not csv_string:
+            flask_session['error'] = "No CSV data returned. Please check the PDF file."
+            return redirect(url_for('tools.data_tools'))
 
-    
-    # # Process each file (dummy processing for now)
-    # extracted_data = []
-    # for file in files:
-    #     if file and file.filename.endswith('.pdf'):
-    #         # Here you would add your PDF extraction logic
-    #         extracted_data.append({"filename": file.filename, "status": "extracted"})
-    
-    # return jsonify({"status": "success", "data": extracted_data}), 200
+        flask_session['csv_data'] = csv_string
+        return redirect(url_for('tools.data_tools'))
+
+    except Exception as e:
+        flask_session['error'] = f"An unexpected error occurred: {str(e)}"
+        return redirect(url_for('tools.data_tools'))
