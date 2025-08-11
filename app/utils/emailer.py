@@ -25,19 +25,18 @@ from googleapiclient.discovery import build
 
 #     return build('gmail', 'v1', credentials=creds)
 
+
 def send_email(recipient, subject, message_text, credentials=None):
     credentials = Credentials(**credentials)
-    service = build('gmail', 'v1', credentials=credentials)
+    service = build("gmail", "v1", credentials=credentials)
     message = EmailMessage()
     message.set_content(message_text)
-    message['To'] = recipient
-    message['From'] = "me"
-    message['Subject'] = subject
+    message["To"] = recipient
+    message["From"] = "me"
+    message["Subject"] = subject
 
     encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
 
-    send_message = {
-        'raw': encoded_message
-    }
+    send_message = {"raw": encoded_message}
 
     return service.users().messages().send(userId="me", body=send_message).execute()

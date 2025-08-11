@@ -11,12 +11,14 @@ ENVIRONMENT = os.environ.get("FLASK_ENV", "development")
 # SQLAlchemy / DB
 # SQLALCHEMY_DATABASE_URI = URL.create("postgresql", username=os.getenv("AWS_RDS_PG_USER"), password=os.getenv("AWS_RDS_PG_PW"), host=os.getenv("AWS_RDS_PG_HOST"), port=os.getenv("AWS_RDS_PG_PORT"), database=os.getenv("AWS_RDS_PG_DB"))
 if ENVIRONMENT == "production":
-    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://{}:{}@{}:{}/{}?sslmode=require".format(
-        os.getenv("AWS_RDS_PG_USER"),
-        os.getenv("AWS_RDS_PG_PW"),
-        os.getenv("AWS_RDS_PG_HOST"),
-        os.getenv("AWS_RDS_PG_PORT"),
-        os.getenv("AWS_RDS_PG_DB"),
+    SQLALCHEMY_DATABASE_URI = (
+        "postgresql+psycopg2://{}:{}@{}:{}/{}?sslmode=require".format(
+            os.getenv("AWS_RDS_PG_USER"),
+            os.getenv("AWS_RDS_PG_PW"),
+            os.getenv("AWS_RDS_PG_HOST"),
+            os.getenv("AWS_RDS_PG_PORT"),
+            os.getenv("AWS_RDS_PG_DB"),
+        )
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
@@ -27,7 +29,9 @@ if ENVIRONMENT == "production":
         "pool_timeout": int(os.environ.get("AWS_RDS_PG_POOL_TIMEOUT", 30)),
     }
     SQLALCHEMY_DATABASE_POOL_SIZE = int(os.environ.get("AWS_RDS_PG_POOL_SIZE", 5))
-    SQLALCHEMY_DATABASE_POOL_RECYCLE = int(os.environ.get("AWS_RDS_PG_POOL_RECYCLE", 1800))
+    SQLALCHEMY_DATABASE_POOL_RECYCLE = int(
+        os.environ.get("AWS_RDS_PG_POOL_RECYCLE", 1800)
+    )
 else:
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///./test.db")
     SQLALCHEMY_ENGINE_OPTIONS = {
@@ -44,9 +48,13 @@ REDIS_TIMEOUT = int(os.environ.get("REDIS_TIMEOUT", 1800))
 # SESSION_COOKIE_NAME = "session"
 # SESSION_COOKIE_SECURE = os.environ.get("FLASK_ENV") == "production"
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev")
-SESSION_PERMANET = False  # Set to True if you want sessions to persist across server restarts
+SESSION_PERMANET = (
+    False  # Set to True if you want sessions to persist across server restarts
+)
 SESSION_TYPE = "filesystem"
-PERMANENT_SESSION_LIFETIME = timedelta(minutes=int(os.environ.get("SESSION_LIFETIME_MINUTES", 45)))
+PERMANENT_SESSION_LIFETIME = timedelta(
+    minutes=int(os.environ.get("SESSION_LIFETIME_MINUTES", 45))
+)
 LAB_NAME = os.environ.get("LAB_NAME", "PRIME")
 
 # Google OAuth
@@ -58,7 +66,9 @@ GOOGLE_TOKEN_URI = os.environ.get("GOOGLE_TOKEN_URI")
 GOOGLE_DISCOVERY_URL = os.environ.get("GOOGLE_DISCOVERY_URL")
 GOOGLE_SCOPES = os.environ.get("GOOGLE_SCOPES", "").split()
 GOOGLE_REDIRECT_URI = (
-    os.environ.get("GOOGLE_REDIRECT_URI_PROD") if ENVIRONMENT == "production" else os.environ.get("GOOGLE_REDIRECT_URI_DEV")
+    os.environ.get("GOOGLE_REDIRECT_URI_PROD")
+    if ENVIRONMENT == "production"
+    else os.environ.get("GOOGLE_REDIRECT_URI_DEV")
 )
 
 GOOGLE_CLIENT_CONFIG = {

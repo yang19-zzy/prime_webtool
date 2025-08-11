@@ -14,23 +14,28 @@ _s3_bucket = None
 _redis_client = None
 # _lambda_client = None
 
+
 def set_google(client):
     global _google
     _google = client
+
 
 def get_google():
     if _google is None:
         raise ValueError("Google client has not been set.")
     return _google
 
+
 def set_google_flow(client):
     global _google_gmail
     _google_gmail = client
+
 
 def get_google_flow():
     if _google_gmail is None:
         raise ValueError("Google Gmail client has not been set.")
     return _google_gmail
+
 
 # def set_lambda_client(client):
 #     global _lambda_client
@@ -59,14 +64,17 @@ def get_google_flow():
 #         raise ValueError("S3 bucket has not been set.")
 #     return _s3_bucket
 
+
 def set_redis(client):
     global _redis_client
     _redis_client = client
 
+
 from flask import current_app
 
+
 def get_redis():
-    redis_client = current_app.extensions.get('redis')
+    redis_client = current_app.extensions.get("redis")
     if redis_client is None:
         raise ValueError("Redis client has not been set.")
     return redis_client
