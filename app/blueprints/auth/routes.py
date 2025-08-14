@@ -110,7 +110,7 @@ def auth_logout():
 @auth_bp.route("/db_test", methods=["GET"])
 def db_test():
     try:
-        db.session.execute(text("SELECT 1"))
+        db.session.execute(text("SELECT * FROM backend.test_connection"))
         return jsonify(
             {"env": os.getenv("FLASK_ENV"), "status": "Database connected successfully"}
         )

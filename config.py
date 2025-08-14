@@ -2,6 +2,7 @@ import os
 from datetime import timedelta
 from dotenv import load_dotenv
 from sqlalchemy.engine import URL
+import json
 
 load_dotenv()  # Loads from .env file if present
 
@@ -32,11 +33,19 @@ if ENVIRONMENT == "production":
     SQLALCHEMY_DATABASE_POOL_RECYCLE = int(
         os.environ.get("AWS_RDS_PG_POOL_RECYCLE", 1800)
     )
-else:
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///./test.db")
+    
+elif ENVIRONMENT == "staging":
+    SQLALCHEMY_DATABASE_URI = os.getenv("STAGING_DB_URI", "sqlite:///./test.db")
     SQLALCHEMY_ENGINE_OPTIONS = {
         "execution_options": {"schema_translate_map": {None: "backend"}}
     }
+elif ENVIRONMENT == "development":
+    SQLALCHEMY_DATABASE_URI = os.getenv("LOCALHOST_DB_URI", "sqlite:///./test.db")
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "execution_options": {"schema_translate_map": {None: "backend"}}
+    }
+else:
+    raise ValueError("Invalid FLASK_ENV value. Must be 'production', 'staging', or 'development'.")
 
 # Redis
 REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
@@ -86,6 +95,7 @@ GOOGLE_CLIENT_CONFIG = {
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 AWS_REGION = os.environ.get("AWS_REGION")
-# AWS_BUCKET_NAME = os.environ.get("AWS_BUCKET_NAME")
+AWS_BUCKET_NAME = os.environ.get("AWS_BUCKET_NAME")
 # WHITELIST_SECRET_NAME = os.environ.get("WHITELIST_SECRET_NAME")
 AWS_LAMBDA_PDF_EXTRACT = os.environ.get("AWS_LAMBDA_PDF_EXTRACT")
+AWS_LAMBDA_METADATA = json.loads(os.environ.get("AWS_LAMBDA_METADATA", "{}"))
