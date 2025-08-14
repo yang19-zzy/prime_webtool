@@ -5,15 +5,13 @@ from flask import render_template, request, session as flask_session, jsonify, u
 from app.utils.emailer import send_email
 from app.utils.option_loader import load_form_options
 from app.models import TrackerForm
-from app.extensions import db
+from app.extensions import db, get_email_list
 from . import tracker_bp
 
 
 @tracker_bp.route("/")
 def test_tracker():
     print("debugging----------:", flask_session.get("user_info"))
-    # if not session.get('user_info'):
-    #     return redirect('/auth/login')
     return render_template("test_tracker.html", title="Test Tracker")
 
 
@@ -40,7 +38,7 @@ def submit_data():
     print(form_data)
 
     send_email(
-        recipient="zzyang@umich.edu",
+        recipient=get_email_list(),
         subject="New Form Submitted [Test]!!!",
         message_text=f"Test Tracker: {subject_id} has been submitted by {form_owner}",
         credentials=flask_session["google_credentials"],
