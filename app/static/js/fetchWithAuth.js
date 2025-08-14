@@ -15,20 +15,9 @@ async function fetchWithAuth(url, options = {}) {
         });
         console.log(response.status);
         if (response.status === 401) {
-            // console.warn("Session expired. Redirecting to login...");
-            // document.getElementsByTagName('main-content').innerHTML = "Session expired. Redirecting to login...";
-            // const returnUrl = encodeURIComponent(window.location.href);
-            // const loginUrl = `/auth/login?next=${returnUrl}&provider=google`;
-            // window.location.href = loginUrl;
             return;
         }
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
         return response;
-        // const data = await response.json();
-        // return data;
 
     } catch (error) {
         console.error("Fetch failed:", error);
