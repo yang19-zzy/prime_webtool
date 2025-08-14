@@ -14,6 +14,7 @@ This document outlines the Git branching convention and usage for this project.
 | `prod/remote`      | **Deployed production** branch (used by EC2 prod).  |
 | `debug/general`    | Misc testing, hotfixes, and experiments             |
 | `prod/backup-*`    | Backup branches for rollbacks or snapshots          |
+| `feature/*`        | Feature specific development.                       |
 
 ---
 
@@ -21,8 +22,10 @@ This document outlines the Git branching convention and usage for this project.
 
 ```mermaid
 graph LR
-  dev/local --> dev/remote
-  dev/remote -->|after QA| prod/remote
+  feature/* --> |after QA| dev/local
+  dev/local --> |sync| dev/remote
+  dev/remote -->|after QA| prod/local
+  prod/local --> |sync| prod/remote
   prod/remote -->|if bug| debug/general
   prod/remote -->|snapshot| prod/backup-local
 ```
@@ -43,7 +46,7 @@ git checkout dev/local
 git pull origin dev/local
 
 # work on feature
-git checkout -b dev/local-my-feature
+git checkout -b feature/feature-desc origin/dev/remote
 
 # merge changes to dev/remote for testing
 git checkout dev/remote
