@@ -46,7 +46,7 @@ def submit_data():
 
     # Save the form data to the database
     new_form = TrackerForm(
-        form_owner=form_owner, subject_id=subject_id, form_data=form_data
+        form_owner=form_owner, subject_id=subject_id, form_data=form_data, timestamp=db.func.now()
     )
     db.session.add(new_form)
     db.session.commit()

@@ -12,7 +12,7 @@ from app.utils.aws_tools import  connect_s3#, connect_lambda,
 from app.utils.activity_logger import register_activity_hooks
 from authlib.integrations.flask_client import OAuth
 
-from app.extensions import db, oauth, set_google, get_google, set_google_flow, set_s3, set_s3_bucket, set_s3_metadata, set_email_list
+from app.extensions import db, oauth, set_google, get_google, set_google_flow, set_s3, set_s3_bucket, set_s3_metadata, set_email_list, get_email_list
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
@@ -97,7 +97,7 @@ def create_app(test_config=None):
     # migrate.init_app(app, db)
 
     # Initialize email list
-    email_list = app.config.get("EMAIL_LIST", "")
+    email_list = app.config.get("GOOGLE_EMAIL_LIST", "")
     set_email_list(email_list)
 
     # Initialize Redis
@@ -136,4 +136,5 @@ def create_app(test_config=None):
     # print("=== FINAL SQLAlchemy DB URI ===")
     # print(app.config['SQLALCHEMY_DATABASE_URI'])
     # print("Google Config", app.config['GOOGLE_CLIENT_CONFIG'])
+    print("email list", get_email_list())
     return app

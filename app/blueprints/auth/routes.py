@@ -10,7 +10,7 @@ from flask import (
     render_template,
     current_app,
 )
-from app.extensions import get_google_flow, db
+from app.extensions import get_google_flow, db, get_email_list
 from app.models import User, UserRole
 from sqlalchemy import text, inspect
 import requests
@@ -126,6 +126,7 @@ def session_check():
                 "logged_in": True,
                 "user_id": flask_session["user_id"],
                 "user_role": flask_session["user_role"],
+                "email_list": get_email_list() or [],
             }
         )
     else:
