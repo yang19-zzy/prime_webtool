@@ -426,6 +426,7 @@ button:hover {
   border-radius: 8px;
   padding: 12px;
   background-color: #f9f9f9;
+  margin: 2px;
 }
 
 .sub-tool-container-item.title {
@@ -473,7 +474,7 @@ input[type="file"]::file-selector-button {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0,0,0,0.4);
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     z-index: 9999;

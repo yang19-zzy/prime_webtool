@@ -20,8 +20,6 @@ def connect_s3(key, secret, region):
     return boto3.client(
         "s3", aws_access_key_id=key, aws_secret_access_key=secret, region_name=region
     )
-
-
 # s3 = connect_s3()
 
 

@@ -8,10 +8,11 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 from app.models import *
 
-# from app.utils.aws_tools import connect_lambda
+from app.utils.aws_tools import  connect_s3#, connect_lambda,
+from app.utils.activity_logger import register_activity_hooks
 from authlib.integrations.flask_client import OAuth
 
-from app.extensions import db, oauth, set_google, get_google, set_google_flow
+from app.extensions import db, oauth, set_google, get_google, set_google_flow, set_s3, set_s3_bucket, set_s3_metadata, set_email_list
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
@@ -63,17 +64,21 @@ def create_app(test_config=None):
     )
     set_google_flow(flow)
 
-    # ## S3 connection
-    # s3_client = connect_s3(
-    #     key=app.config['AWS_ACCESS_KEY_ID'],
-    #     secret=app.config['AWS_SECRET_ACCESS_KEY'],
-    #     region=app.config['AWS_REGION']
-    # )
-    # set_s3(s3_client)
+    ## S3 connection
+    s3_client = connect_s3(
+        key=app.config['AWS_ACCESS_KEY_ID'],
+        secret=app.config['AWS_SECRET_ACCESS_KEY'],
+        region=app.config['AWS_REGION']
+    )
+    set_s3(s3_client)
 
-    # ## S3 bucket name - this is used in blueprints
-    # s3_bucket_ = app.config['AWS_BUCKET_NAME']
-    # set_s3_bucket(s3_bucket_)
+    ## S3 bucket name - this is used in blueprints
+    s3_bucket_ = app.config['AWS_BUCKET_NAME']
+    set_s3_bucket(s3_bucket_)
+
+    ## S3 put metadata
+    s3_metadata = app.config.get('AWS_LAMBDA_METADATA', '{}')
+    set_s3_metadata(s3_metadata)
 
     # ## Lambda Function connection
     # lambda_client = connect_lambda(
@@ -88,7 +93,12 @@ def create_app(test_config=None):
 
     # Initialize database
     db.init_app(app)
+    register_activity_hooks(db)
     # migrate.init_app(app, db)
+
+    # Initialize email list
+    email_list = app.config.get("EMAIL_LIST", "")
+    set_email_list(email_list)
 
     # Initialize Redis
     redis_client = Redis(

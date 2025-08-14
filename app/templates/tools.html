@@ -15,50 +15,39 @@
 {% block content %}
 <div>
     <h2>Tools</h2>
+    {% if not session.user_info %}
 
+        <p>Please log in first.</p>
+        <a href="{{ url_for('auth.auth_login', next=request.url, provider='google') }}"><button type="button" class="btn login-btn" id="login-btn">Log in</button></a>
+
+    {% else %}
     <div id="tools-container">
-        <div id="tools-pdf-container" class="sub-tool-container">
+
+        <div id="tools-pdf-container-test" class="sub-tool-container">
             <div class="sub-tool-container-item title">
                 <p class="tool-title">Dynamometer PDF Data Extraction</p>
             </div>
             <div class="sub-tool-container-item file-form">
-                <form action="{{ url_for('tools.extract_pdf') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ url_for('tools.create_job') }}" method="POST" enctype="multipart/form-data">
                     <!-- <label for="pdf-upload">Choose PDFs to upload</label>                 -->
-                    <input type="file" id="pdf-upload" name="pdf-upload" accept=".pdf">
-                    <button class="btn submit-btn" id="extract-pdf-btn">Extract Data & Download</button>
+                    <input type="file" id="pdf-upload-test" name="pdf-upload-test" accept=".pdf">
+                    <button class="btn submit-btn" id="extract-pdf-btn-test">Extract Data</button>
+                    <a id="status-bar" class="btn"></a>
                 </form>
             </div>
-            {% if csv_data %}
-            <script>
-                // Auto-download the CSV and refresh the page after
-                const csvData = "{{ csv_data|safe }}";  // base64 string
-
-                const blob = new Blob([Uint8Array.from(atob(csvData), c => c.charCodeAt(0))], { type: 'text/csv' });
-                const url = URL.createObjectURL(blob);
-
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'extracted_data.csv';
-                a.click();
-
-                setTimeout(() => {
-                    window.location.href = "{{ url_for('tools.data_tools') }}";  // hard refresh
-                }, 1000);
-            </script>
-            {% endif %}
         </div>
+        
     </div>
-    
-</div>
-{% endblock %}
+    {% endif %}
 
-{% block error %}
-    {% if error %}
+
     <div id="error-popup" class="popup-overlay">
         <div class="popup-content">
             <span class="close-btn" onclick="document.getElementById('error-popup').style.display='none'">&times;</span>
-            <p>{{ error }}</p>
+            <p></p>
         </div>
     </div>
-    {% endif %}
+
+</div>
 {% endblock %}
+

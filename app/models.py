@@ -83,3 +83,34 @@ class User(db.Model):
 
     def __repr__(self):
         return f"<User {self.email}>"
+
+
+class PDFJob(db.Model):
+    __tablename__ = "pdf_jobs"
+    __table_args__ = {"schema": "backend"}
+
+    job_id = db.Column(db.String(100), primary_key=True)
+    status = db.Column(db.String(50), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False)
+    completed_at = db.Column(db.DateTime, nullable=True)
+    download_url = db.Column(db.String(255), nullable=True)
+    expired_in = db.Column(db.Integer, nullable=True, default=3600)  # seconds
+
+    def __repr__(self):
+        return f"<PDFJob {self.job_id}>"
+    
+
+class UserActivity(db.Model):
+    __tablename__ = "user_activity"
+    __table_args__ = {"schema": "backend"}
+
+    row_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(100), nullable=False)
+    action = db.Column(db.String(100), nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False)
+    request_path = db.Column(db.String(255), nullable=False)
+    request_method = db.Column(db.String(10), nullable=False)
+    request_ip = db.Column(db.String(45), nullable=False)
+
+    def __repr__(self):
+        return f"<UserActivity {self.row_id} - {self.user_id} - {self.action}>"
