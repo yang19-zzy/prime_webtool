@@ -48,21 +48,19 @@ else:
     raise ValueError("Invalid FLASK_ENV value. Must be 'production', 'staging', or 'development'.")
 
 # Redis
-REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
+REDIS_HOST = os.environ.get("REDIS_HOST", "redis")
 REDIS_PORT = int(os.environ.get("REDIS_PORT", 6379))
 REDIS_DB = int(os.environ.get("REDIS_DB", 0))
 REDIS_TIMEOUT = int(os.environ.get("REDIS_TIMEOUT", 1800))
 
 # Flask session
-# SESSION_COOKIE_NAME = "session"
-# SESSION_COOKIE_SECURE = os.environ.get("FLASK_ENV") == "production"
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev")
-SESSION_PERMANET = (
+SESSION_PERMANENT = (
     False  # Set to True if you want sessions to persist across server restarts
 )
-SESSION_TYPE = "filesystem"
+SESSION_TYPE = os.environ.get("SESSION_TYPE", "filesystem")
 PERMANENT_SESSION_LIFETIME = timedelta(
-    minutes=int(os.environ.get("SESSION_LIFETIME_MINUTES", 45))
+    minutes=int(os.environ.get("SESSION_LIFETIME_MINUTES", 15))
 )
 LAB_NAME = os.environ.get("LAB_NAME", "PRIME")
 
@@ -98,6 +96,5 @@ AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 AWS_REGION = os.environ.get("AWS_REGION")
 AWS_BUCKET_NAME = os.environ.get("AWS_BUCKET_NAME")
-# WHITELIST_SECRET_NAME = os.environ.get("WHITELIST_SECRET_NAME")
 AWS_LAMBDA_PDF_EXTRACT = os.environ.get("AWS_LAMBDA_PDF_EXTRACT")
 AWS_LAMBDA_METADATA = json.loads(os.environ.get("AWS_LAMBDA_METADATA", "{}"))

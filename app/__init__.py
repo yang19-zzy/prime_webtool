@@ -1,6 +1,7 @@
 # app/__init__.py
 
-from flask import Flask
+from flask import Flask, render_template, session as flask_session
+from flask_session import Session
 from config import *
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -10,12 +11,12 @@ from app.models import *
 
 from app.utils.aws_tools import  connect_s3#, connect_lambda,
 from app.utils.activity_logger import register_activity_hooks
-from authlib.integrations.flask_client import OAuth
+# from authlib.integrations.flask_client import OAuth
 
-from app.extensions import db, oauth, set_google, get_google, set_google_flow, set_s3, set_s3_bucket, set_s3_metadata, set_email_list, get_email_list
-from google.oauth2.credentials import Credentials
+from app.extensions import db, oauth, set_google, set_google_flow, set_s3, set_s3_bucket, set_s3_metadata, set_email_list, get_email_list
+# from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
+# from googleapiclient.discovery import build
 
 from app.blueprints.main import main_bp
 from app.blueprints.auth import auth_bp
@@ -23,6 +24,7 @@ from app.blueprints.tracker import tracker_bp
 from app.blueprints.viewer import viewer_bp
 from app.blueprints.validator import validator_bp
 from app.blueprints.tools import tools_bp
+from app.blueprints.errors import errors_bp
 
 from redis import Redis
 
@@ -101,15 +103,17 @@ def create_app(test_config=None):
     set_email_list(email_list)
 
     # Initialize Redis
+    print("Connecting to Redis at", app.config["REDIS_HOST"], app.config["REDIS_PORT"])
     redis_client = Redis(
         host=app.config["REDIS_HOST"],
         port=app.config["REDIS_PORT"],
         db=app.config["REDIS_DB"],
-        decode_responses=True,
+        decode_responses=False,
     )
     try:
         redis_client.ping()
         print("Redis connection successful")
+        app.config["SESSION_REDIS"] = redis_client
     except Exception as e:
         print(f"Redis connection failed: {e}")
     app.extensions["redis"] = redis_client
@@ -124,17 +128,23 @@ def create_app(test_config=None):
     app.register_blueprint(tracker_bp)
     app.register_blueprint(validator_bp)
     app.register_blueprint(tools_bp)
+    app.register_blueprint(errors_bp)
 
     # force end db session
-    @app.teardown_appcontext
-    def shutdown_session(exception=None):
-        db.session.remove()
-        if exception:
-            print(f"Exception during request: {exception}")
+    # @app.teardown_appcontext
+    # def shutdown_session(exception=None):
+    #     db.session.remove()
+    #     if exception:
+    #         print(f"Exception during request: {exception}")
+
+
+    # Register session interface
+    Session(app)
+    # app.session_interface.regenerate(flask_session)
 
     print(app.url_map)
     # print("=== FINAL SQLAlchemy DB URI ===")
     # print(app.config['SQLALCHEMY_DATABASE_URI'])
     # print("Google Config", app.config['GOOGLE_CLIENT_CONFIG'])
-    print("email list", get_email_list())
+    # print("email list", get_email_list())
     return app

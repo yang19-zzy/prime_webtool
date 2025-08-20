@@ -22,7 +22,6 @@ def auth_login():
     next_url = request.args.get("next", request.referrer or url_for("/"))
     flask_session["next_url"] = next_url
     redirect_uri = url_for("auth.auth_callback", _external=True)
-    # return get_google().authorize_redirect(redirect_uri, state=next_url)
 
     authorization_url, state = get_google_flow().authorization_url(
         access_type="offline", include_granted_scopes="true", state=next_url

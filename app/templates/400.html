@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}400 Bad Request{% endblock %}
+
+{% block error %}
+<div class="error-400 error">
+    <h1>Oops! Something went wrong.</h1>
+    <p>Your request could not be processed (error 400).</p>
+    <p>This can sometimes happen if your browser sends too much data, such as too many cookies. Try clearing your cookies and reloading the page.</p>
+    <a href="{{ url_for('main.index') }}">Return to homepage</a>
+</div>
+{% endblock %}
