@@ -48,3 +48,7 @@ docker-compose*.yml
 #Docker
 Dockerfile*
 !Dockerfile.template
+
+#session
+flask_session/*
+flask_session
