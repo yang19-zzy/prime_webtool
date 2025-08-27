@@ -10,7 +10,8 @@ from flask import (
     render_template,
     current_app,
 )
-from app.extensions import get_google_flow, db, get_email_list
+from flask_login import login_user, current_user
+from app.extensions import get_google_flow, db, get_email_list, login_manager
 from app.models import User, UserRole
 from sqlalchemy import text, inspect
 import requests
@@ -63,21 +64,21 @@ def auth_callback():
 
         # Check if the user is already in the database
         # If not, create a new user
-        user = User.query.filter_by(username=user_info["user_id"]).first()
+        user = User.query.filter_by(user_id=user_info["user_id"]).first()
         if not user:
             user = User(
                 email=user_info["email"],
-                username=user_info["user_id"],
+                user_id=user_info["user_id"],
                 first_name=user_info["given_name"],
                 last_name=user_info["family_name"],
             )
             db.session.add(user)
             db.session.commit()
-
+        login_user(user)
         # check user role
-        user_role = UserRole.query.filter_by(user_id=user.username).first()
+        user_role = UserRole.query.filter_by(user_id=user.user_id).first()
         if not user_role:
-            user_role = UserRole(user_id=user.username, role="app_user")  # Default role
+            user_role = UserRole(user_id=user.user_id, role="app_user")  # Default role
             db.session.add(user_role)
             db.session.commit()
 
@@ -102,7 +103,6 @@ def auth_logout():
     next_url = request.args.get("state") or request.referrer or "/"
     flask_session.clear()
     response = make_response(redirect(next_url))
-    # response.delete_cookie('logged_in')
     return response
 
 
@@ -130,3 +130,8 @@ def session_check():
         )
     else:
         return jsonify({"logged_in": False}), 401
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.filter(User.user_id == user_id).first()
