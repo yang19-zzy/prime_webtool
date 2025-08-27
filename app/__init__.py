@@ -1,6 +1,7 @@
 # app/__init__.py
 
-from flask import Flask, render_template, session as flask_session
+from flask import Flask
+from flask_login import LoginManager
 from flask_session import Session
 from config import *
 from flask_cors import CORS
@@ -11,12 +12,9 @@ from app.models import *
 
 from app.utils.aws_tools import  connect_s3#, connect_lambda,
 from app.utils.activity_logger import register_activity_hooks
-# from authlib.integrations.flask_client import OAuth
 
-from app.extensions import db, oauth, set_google, set_google_flow, set_s3, set_s3_bucket, set_s3_metadata, set_email_list, get_email_list
-# from google.oauth2.credentials import Credentials
+from app.extensions import db, oauth, login_manager, set_google, set_google_flow, set_s3, set_s3_bucket, set_s3_metadata, set_email_list
 from google_auth_oauthlib.flow import InstalledAppFlow
-# from googleapiclient.discovery import build
 
 from app.blueprints.main import main_bp
 from app.blueprints.auth import auth_bp
@@ -25,6 +23,8 @@ from app.blueprints.viewer import viewer_bp
 from app.blueprints.validator import validator_bp
 from app.blueprints.tools import tools_bp
 from app.blueprints.errors import errors_bp
+from app.blueprints.api import api_bp
+from app.blueprints.profile import profile_bp
 
 from redis import Redis
 
@@ -121,6 +121,11 @@ def create_app(test_config=None):
     # Initialize ProxyFix middleware
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1, x_port=1, x_proto=1)
 
+    # Initialize Flask-Login
+    login_manager.init_app(app)
+    login_manager.login_view = "auth.auth_login"
+    login_manager.login_message = "Please log in to access this page."
+    
     # Register Blueprints
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
@@ -129,6 +134,8 @@ def create_app(test_config=None):
     app.register_blueprint(validator_bp)
     app.register_blueprint(tools_bp)
     app.register_blueprint(errors_bp)
+    app.register_blueprint(profile_bp)
+    app.register_blueprint(api_bp, url_prefix="/api")
 
     # force end db session
     # @app.teardown_appcontext
@@ -140,7 +147,6 @@ def create_app(test_config=None):
 
     # Register session interface
     Session(app)
-    # app.session_interface.regenerate(flask_session)
 
     print(app.url_map)
     # print("=== FINAL SQLAlchemy DB URI ===")
