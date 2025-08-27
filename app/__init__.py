@@ -27,6 +27,7 @@ from app.blueprints.api import api_bp
 from app.blueprints.profile import profile_bp
 
 from redis import Redis
+from flask_caching import Cache
 
 from app.dash_viewer.init_dash import init_dash as init_dash_viewer
 
@@ -125,7 +126,13 @@ def create_app(test_config=None):
     login_manager.init_app(app)
     login_manager.login_view = "auth.auth_login"
     login_manager.login_message = "Please log in to access this page."
-    
+
+    # Initialize Flask-Caching
+    cache = Cache(app, config={
+        "CACHE_TYPE": "RedisCache", 
+        "CACHE_REDIS_CLIENT": redis_client
+    })
+
     # Register Blueprints
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
