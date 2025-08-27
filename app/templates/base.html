@@ -35,6 +35,9 @@
         <a href="{{ url_for('viewer.data_viewer') }}"><div class="menu__link">📋 Data Viewer</div></a>
         <a href="{{ url_for('tools.data_tools') }}"><div class="menu__link">⚙️ Tools</div></a>
         <a href="{{ url_for('validator.validate') }}"><div class="menu__link">⚠️ Test Validator</div></a>
+        {% if session.user_info %}
+        <a href="{{ url_for('profile.load_profile') }}"><div class="menu__link">👤 Profile</div></a>
+        {% endif %}
         {% block logout_btn %}{% endblock %}
     </nav>
 

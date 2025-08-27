@@ -207,3 +207,10 @@ function logoutAndStay() {
     const currentUrl = window.location.href;
     window.location.href = `/logout?state=${encodeURIComponent(currentUrl)}`;
 }
+
+function logoutToHome() {
+    fetch('/auth/logout', { method: 'POST' })
+        .finally(() => {
+            window.location.href = "/";
+        });
+}
