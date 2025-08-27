@@ -63,11 +63,11 @@ def auth_callback():
 
         # Check if the user is already in the database
         # If not, create a new user
-        user = User.query.filter_by(username=user_info["user_id"]).first()
+        user = User.query.filter_by(user_id=user_info["user_id"]).first()
         if not user:
             user = User(
                 email=user_info["email"],
-                username=user_info["user_id"],
+                user_id=user_info["user_id"],
                 first_name=user_info["given_name"],
                 last_name=user_info["family_name"],
             )
@@ -75,9 +75,9 @@ def auth_callback():
             db.session.commit()
 
         # check user role
-        user_role = UserRole.query.filter_by(user_id=user.username).first()
+        user_role = UserRole.query.filter_by(user_id=user.user_id).first()
         if not user_role:
-            user_role = UserRole(user_id=user.username, role="app_user")  # Default role
+            user_role = UserRole(user_id=user.user_id, role="app_user")  # Default role
             db.session.add(user_role)
             db.session.commit()
 
