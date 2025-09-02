@@ -16,13 +16,13 @@ A step-by-step guide to spin up an EC2 instance and deploy PRIME Webtool in Dock
 ```ssh -i /path/to/key.pem ubuntu@<EC2_PUBLIC_IP>```
 
 ### Update & install Docker
-```
+```sh
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y docker.io docker-compose
 ```
 
 #### (Optional) Run Docker without sudo
-```
+```sh
 sudo usermod -aG docker $USER
 ```
 Then re-login or run: newgrp docker
@@ -31,7 +31,7 @@ Then re-login or run: newgrp docker
 
 
 ## C. Pull & Configure the App
-```
+```sh
 cd ~
 git clone https://github.com/your-org/prime_webtool.git
 cd prime_webtool
@@ -41,7 +41,7 @@ cd prime_webtool
 - Set DB URI to your production database
 
 ## D. Deploy with Docker Compose
-```
+```sh
 docker-compose up -d --build
 docker ps   # confirm containers are running
 ```
@@ -52,8 +52,11 @@ docker ps   # confirm containers are running
 3.	Restart Nginx: `sudo systemctl restart nginx`
 
 ## F. Enable HTTPS with Let’s Encrypt
-```
+```sh
 sudo apt install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d your.domain.com
+sudo certbot --nginx -d your.domain.com -d www.your.domain.com --agree-tos -m your@email.com
 ```
 Follow prompts to issue and auto-renew certificates.
+- `-d` specifies what domains to include in the certificate
+- `--agree-tos` automatically agree to Let's Encrypt's Terms of Service
+- `-m your@email.com`: email for important renewal/expiration notifications from Let's Encrypt

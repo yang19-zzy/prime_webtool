@@ -5,7 +5,7 @@ This document provide a list of infrastructure maintenance routines and describe
 
     1. [Backups](#backups)
     2. [Monitoring & Alerts]
-    3. [Patching & Updates]
+    3. [Patching & Updates](#patching--updates)
     4. [Database Maintenance]
     5. [Security Maintenance]
     6. [Resource Scaling & Cost Management](#)
@@ -64,6 +64,58 @@ To restore:
 - Document any automated backup solutions here when implemented.
 
 
+
+
+
+## Patching & Updates
+### Scheduled Maintenance
+
+A scheduled maintenance is needed when a feature update is required. Check the lab calendar before switch to maintenance server.
+
+**How to build a maintenance page**
+1. **Create static page locally**
+    - Create a `index.html` file
+    - Create a `nginx/maintenance.conf` file
+2. **Create a small EC2 instance and use the same set of inbound rules as the prod server**
+    - A `t3.nano` with Amazon 2023 is good enough
+    - Inbound 22 (SSH) from UM IP, 80 and 443 from 0.0.0.0/0
+    - Install nginx
+        ```sh
+        sudo dnf install -y nginx
+        sudo systemctl enable --now nginx
+        ```
+    - Copy static files (scp files to /home/ec2-user first, then move to dir accordingly for conveniance)
+        ```sh
+        sudo mkdir -p /var/www/maintenance
+        sudo cp maintenance/index.html /var/www/maintenance/index.html
+        sudo chown -R root:root /var/www/maintenance
+        sudo chmod -R a=rX /var/www/maintenance
+        sudo cp nginx/maintenance.conf /etc/nginx/conf.d/maintenance.conf
+        ```
+    - Test and reload
+        ```sh
+        sudo nginx -t
+        sudo systemctl reload nginx
+        ```
+3. **HTTPS certificate on maintenance instance**
+    - Copy prod certs to maintenance server
+        ```sh
+        # on prod 
+        sudo tar czf letsencrypt-certs.tar.gz -C /etc/letsencrypt live/prime.kines.umich.edu archive/prime.kines.umich.edu renewal/prime.kines.umich.edu.conf
+        # on local machine
+        scp -i <prod-public-key> ubuntu@<prod-public-ip>:/home/ubuntu/letsencrypt-certs.tar.gz . 
+        scp -i <maintenance-public-key> letsencrypt-certs.tar.gz ec2-user@<maintenance-public-ip>:/home/ec2-user/tmp/letsencrypt-certs.tar.gz          
+        # on maintenance
+        sudo tar xzf /home/ec2-user/tmp/letsencrypt-certs.tar.gz -C /etc/letsencrypt
+        ```
+
+
+
+
+
+
+
+
 ## Resource Scaling & Cost Management
 ### Automations used on AWS - Schedulers
 
@@ -76,6 +128,10 @@ Schedulers are used to stop and start EC2 instances and RDB instance automatical
 ```
 
 This script initializes the automation tool and runs a sample task. Replace `"example_task"` with your specific task name.
+
+
+
+
 
 
 ## Certificate & Domain Renewal
