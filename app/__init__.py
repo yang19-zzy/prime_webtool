@@ -1,10 +1,12 @@
 # app/__init__.py
 
-from flask import Flask
+from config import *
+
+from flask import Flask, jsonify, request, url_for, redirect
+from flask_caching import Cache
+from flask_cors import CORS
 from flask_login import LoginManager
 from flask_session import Session
-from config import *
-from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -16,18 +18,17 @@ from app.utils.activity_logger import register_activity_hooks
 from app.extensions import db, oauth, login_manager, set_google, set_google_flow, set_s3, set_s3_bucket, set_s3_metadata, set_email_list
 from google_auth_oauthlib.flow import InstalledAppFlow
 
-from app.blueprints.main import main_bp
-from app.blueprints.auth import auth_bp
-from app.blueprints.tracker import tracker_bp
-from app.blueprints.viewer import viewer_bp
-from app.blueprints.validator import validator_bp
-from app.blueprints.tools import tools_bp
-from app.blueprints.errors import errors_bp
 from app.blueprints.api import api_bp
+from app.blueprints.auth import auth_bp
+from app.blueprints.errors import errors_bp
+from app.blueprints.main import main_bp
 from app.blueprints.profile import profile_bp
+from app.blueprints.tools import tools_bp
+from app.blueprints.tracker import tracker_bp
+from app.blueprints.validator import validator_bp
+from app.blueprints.viewer import viewer_bp
 
 from redis import Redis
-from flask_caching import Cache
 
 from app.dash_viewer.init_dash import init_dash as init_dash_viewer
 
@@ -124,8 +125,13 @@ def create_app(test_config=None):
 
     # Initialize Flask-Login
     login_manager.init_app(app)
-    login_manager.login_view = "auth.auth_login"
-    login_manager.login_message = "Please log in to access this page."
+    login_manager.login_view = "main.index"
+    @login_manager.unauthorized_handler
+    def unauthorized_callback():
+        if request.path.startswith('/api/'):
+            return jsonify({'error': 'Unauthorized'}), 401
+        else:
+            return redirect(url_for('main_page'))
 
     # Initialize Flask-Caching
     cache = Cache(app, config={

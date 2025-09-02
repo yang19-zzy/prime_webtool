@@ -1,6 +1,8 @@
 # utils/schema_manager.py
-from app.models import User, UserRole, SchemaAccess
+from collections import defaultdict
+from app.models import *
 
+# functions for profile management
 def get_schemas_for_user(user_id):
     '''
     Get schemas for a specific user
@@ -62,3 +64,18 @@ def get_all_users():
         "role": user.role,
         "in_lab_user": user.in_lab_user
     } for user in users]
+
+
+# functions for static data retrieval
+def get_table_options():
+    '''
+    Get table options for data-viewer
+    '''
+    # Logic to retrieve table options
+    options = TableColumns.query.order_by(
+        TableColumns.id, TableColumns.data_source, TableColumns.table_name
+    ).all()
+    grouped = defaultdict(lambda: defaultdict(list))
+    for opt in options:
+        grouped[opt.data_source][opt.table_name].append(opt.column_name)
+    return grouped
