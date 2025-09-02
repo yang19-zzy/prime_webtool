@@ -1,10 +1,10 @@
-# app/blueprints/validator/__init__.py
+# app/blueprints/tools/__init__.py
 from flask import Blueprint
 
-validator_bp = Blueprint(
-    "validator",
+tools_bp = Blueprint(
+    "tools",
     __name__,
-    url_prefix="/test_valid",
+    url_prefix="/data_tools",
     template_folder="../../templates",
     static_folder="../../static",
 )

@@ -3,8 +3,9 @@
 from app.extensions import db
 from sqlalchemy import UniqueConstraint
 
+
 class FormOptions(db.Model):
-    __tablename__ = 'form_options'
+    __tablename__ = "form_options"
 
     row_id = db.Column(db.Integer, primary_key=True)
     field_name = db.Column(db.String(100), nullable=False)
@@ -14,10 +15,12 @@ class FormOptions(db.Model):
     
 
 class TableColumns(db.Model):
-    __tablename__ = 'table_columns'
+    __tablename__ = "table_columns"
     __table_args__ = (
-        UniqueConstraint('table_name', 'column_name', 'data_source', name='uq_table_columns'),
-        {'schema': 'backend'}
+        UniqueConstraint(
+            "table_name", "column_name", "data_source", name="uq_table_columns"
+        ),
+        {"schema": "backend"},
     )
 
     id = db.Column(db.Integer, primary_key=True)
@@ -27,8 +30,8 @@ class TableColumns(db.Model):
 
 
 class MergeHistory(db.Model):
-    __tablename__ = 'merge_history'
-    __table_args__ = ({'schema': 'backend'})
+    __tablename__ = "merge_history"
+    __table_args__ = {"schema": "backend"}
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.String(100), nullable=False)
@@ -36,9 +39,10 @@ class MergeHistory(db.Model):
     merged_key = db.Column(db.String(100), nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False)
 
+
 class TrackerForm(db.Model):
-    __tablename__ = 'tracker_form'
-    __table_args__ = ({'schema': 'backend'})
+    __tablename__ = "tracker_form"
+    __table_args__ = {"schema": "backend"}
 
     id = db.Column(db.Integer, primary_key=True)
     form_owner = db.Column(db.String(100), nullable=False)
@@ -49,13 +53,14 @@ class TrackerForm(db.Model):
     validated = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
-        return f'<TrackerForm {self.id}>'
-    
+        return f"<TrackerForm {self.id}>"
+
+
 class UserRole(db.Model):
-    __tablename__ = 'user_role'
+    __tablename__ = "user_role"
     __table_args__ = (
-        UniqueConstraint('user_id', 'role', name='user_role_pkey'),
-        {'schema': 'backend'}
+        UniqueConstraint("user_id", "role", name="user_role_pkey"),
+        {"schema": "backend"},
     )
 
     id = db.Column(db.Integer, primary_key=True)
@@ -63,21 +68,49 @@ class UserRole(db.Model):
     role = db.Column(db.String(50), nullable=False)
 
     def __repr__(self):
-        return f'<UserRole {self.user_id} - {self.role}>'
-    
-class User(db.Model):
-    __tablename__ = 'user'
-    __table_args__ = (
-        {'schema': 'backend'}
-    )
+        return f"<UserRole {self.user_id} - {self.role}>"
 
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100), nullable=False)
-    password = db.Column(db.String(100), nullable=True)
+
+class User(db.Model):
+    __tablename__ = "user"
+    __table_args__ = {"schema": "backend"}
+
+    row_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), nullable=False)
     first_name = db.Column(db.String(100), nullable=True)
     last_name = db.Column(db.String(100), nullable=True)
 
+    def __repr__(self):
+        return f"<User {self.email}>"
+
+
+class PDFJob(db.Model):
+    __tablename__ = "pdf_jobs"
+    __table_args__ = {"schema": "backend"}
+
+    job_id = db.Column(db.String(100), primary_key=True)
+    status = db.Column(db.String(50), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False)
+    completed_at = db.Column(db.DateTime, nullable=True)
+    download_url = db.Column(db.String(255), nullable=True)
+    expired_in = db.Column(db.Integer, nullable=True, default=3600)  # seconds
 
     def __repr__(self):
-        return f'<User {self.email}>'
+        return f"<PDFJob {self.job_id}>"
+    
+
+class UserActivity(db.Model):
+    __tablename__ = "user_activity"
+    __table_args__ = {"schema": "backend"}
+
+    row_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(100), nullable=False)
+    action = db.Column(db.String(100), nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False)
+    request_path = db.Column(db.String(255), nullable=False)
+    request_method = db.Column(db.String(10), nullable=False)
+    request_ip = db.Column(db.String(45), nullable=False)
+
+    def __repr__(self):
+        return f"<UserActivity {self.row_id} - {self.user_id} - {self.action}>"

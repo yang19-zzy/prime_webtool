@@ -44,3 +44,11 @@ certs*/
 *.dev
 docker-compose*.yml
 !docker-compose.template.yml
+
+#Docker
+Dockerfile*
+!Dockerfile.template
+
+#session
+flask_session/*
+flask_session

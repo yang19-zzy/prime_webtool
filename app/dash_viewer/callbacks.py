@@ -2,21 +2,20 @@
 from dash import Output, Input, State, dcc
 from dash.exceptions import PreventUpdate
 from dash import html, dash_table
+
 # import redis
 from app.utils.storage_tool import get_redis
 import json
 import pandas as pd
 
+
 def register_callbacks(app):
-    @app.callback(
-        Output('table-container', 'children'),
-        Input('url', 'pathname')
-    )
+    @app.callback(Output("table-container", "children"), Input("url", "pathname"))
     def display_table(pathname):
-        if not pathname or not pathname.startswith('/dash_viewer/'):
+        if not pathname or not pathname.startswith("/dash_viewer/"):
             raise PreventUpdate
 
-        key = pathname.replace('/dash_viewer/', '')
+        key = pathname.replace("/dash_viewer/", "")
         if not key:
             raise PreventUpdate
 
@@ -25,18 +24,20 @@ def register_callbacks(app):
         if not value:
             return html.Div("Data not found")
 
-        df = pd.DataFrame(json.loads(json.loads(value)))  # double decode due to how you saved
+        df = pd.DataFrame(
+            json.loads(json.loads(value))
+        )  # double decode due to how you saved
         return dash_table.DataTable(
-            id='merged-table',
+            id="merged-table",
             columns=[{"name": i, "id": i} for i in df.columns],
-            data=df.to_dict('records'),
+            data=df.to_dict("records"),
             page_size=10,
-            style_table={'overflowX': 'auto'},
-            style_cell={'textAlign': 'left', 'padding': '5px'},
-            filter_action='native',
-            sort_action='native',
+            style_table={"overflowX": "auto"},
+            style_cell={"textAlign": "left", "padding": "5px"},
+            filter_action="native",
+            sort_action="native",
         )
-    
+
     @app.callback(
         Output("download-dataframe-xlsx", "data"),
         Input("btn-download", "n_clicks"),
