@@ -50,3 +50,15 @@ def user_schemas(user_id):
 
 
 # Data Retrieval
+@api_bp.route("/data/view/table_options", methods=["GET"])
+@login_required
+def table_options():
+    options = get_table_options()
+    return jsonify({"table_options": options}), 200
+
+@api_bp.route("/data/view/merge", methods=["POST"])
+@login_required
+def merge_data():
+    data = request.json
+    # Logic to merge data
+    return jsonify({"message": "Data merged successfully"}), 200
