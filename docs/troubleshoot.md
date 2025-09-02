@@ -65,9 +65,25 @@ Make sure a new pool is used when commit to database.
 
 ---
 
-## Issue 5: 
+## Issue 5: Error connect to EC2 with first login
+
+**Description:**
+Unable to SSH connect EC2 instance in first login. Error message may like "Permissions 0644 for <access-key> are too open."
+
+**Solution:**
+Run command line where the key sits in
+```sh
+chmod 600 <key-file-path>
+```
+
+**Tips:**
+- Permission `0644` means owner can read/write, others can only read.
+- Permission 0600 means only the owner can read/write, others have no permissions.
+
+---
+
+## Issue 6: 
 
 > Add more issues as needed, following this format.
 
 ---
-
