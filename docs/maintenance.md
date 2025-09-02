@@ -64,6 +64,20 @@ To restore:
 - Document any automated backup solutions here when implemented.
 
 
+## Resource Scaling & Cost Management
+### Automations used on AWS - Schedulers
+
+Schedulers are used to stop and start EC2 instances and RDB instance automatically on a recurring schedule.
+
+- The role asigned to a scheduler has to have permission to assume role and invoke lambda function since we're using lambda function to control instances.
+
+```json
+
+```
+
+This script initializes the automation tool and runs a sample task. Replace `"example_task"` with your specific task name.
+
+
 ## Certificate & Domain Renewal
 ### TLS/SSL Certificate (Let’s Encrypt via Certbot)
 
