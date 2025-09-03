@@ -108,6 +108,22 @@ The web server uses **Let's Encrypt** to enable HTTPS. Certificate management is
 ### Roles and Policies
 
 
+## 8. Housekeeping Tasks
+ 
+### Checklist to verity TLS, nginx, and proxy headers
+1. SSL is good + HTTP -> HTTPS redirects
+    ```sh
+    # TLS cert info
+    echo | openssl s_client -connect prime.kines.umich.edu:443 -servername prime.kines.umich.edu 2>/dev/null | openssl x509 -noout -subject -issuer -dates
+
+    # HTTPS returns 200
+    curl -sS https://prime.kines.umich.edu -o /dev/null -w "%{http_code}\n"
+
+    # HTTP redirects to HTTPS and shows Location header
+    curl -sI http://prime.kines.umich.edu | sed -n '1p;/^Location/p'
+    ```
+2. 
+
 
 ## Automations used on AWS
 
