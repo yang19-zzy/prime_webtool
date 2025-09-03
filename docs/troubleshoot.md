@@ -92,8 +92,7 @@ Getting 502 Gateway Error when routing /auth/oauth2callback, while everything wo
 
 ---
 
-## Issue 6:
-## Issue 5: Error connect to EC2 with first login
+## Issue 6: Error connect to EC2 with first login
 
 **Description:**
 Unable to SSH connect EC2 instance in first login. Error message may like "Permissions 0644 for <access-key> are too open."
@@ -110,7 +109,7 @@ chmod 600 <key-file-path>
 
 ---
 
-## Issue 6: 
+## Issue 7: 
 
 > Add more issues as needed, following this format.
 
