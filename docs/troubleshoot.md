@@ -65,6 +65,34 @@ Make sure a new pool is used when commit to database.
 
 ---
 
+## Issue 5: 502 Gateway Error on prod
+
+**Description:**
+Getting 502 Gateway Error when routing /auth/oauth2callback, while everything works fine with local testing.
+
+**Solution:**
+- Modify on nginx config, make sure it has:
+    ```sh
+    # In the 443 server/location / block you should see:
+    #   proxy_set_header X-Forwarded-Proto $scheme;
+    #   proxy_set_header X-Forwarded-Host $host;
+    #   proxy_set_header X-Forwarded-Port $server_port;
+    #   proxy_http_version 1.1;
+    #   proxy_redirect off;
+    ```
+- Modify on Gunicorn, make sure it has good amount workers to process work
+    ```Dockerfile
+    ["gunicorn","-w","3","--threads","4","-b","0.0.0.0:5000","--timeout","90","--graceful-timeout","30","--forwarded-allow-ips=*","run:app"]
+    ```
+
+**Tips:**
+- Make sure the database connection is open
+- Make sure the instance connection is open
+- Make sure you can consult with ChatGPT
+
+---
+
+## Issue 6:
 ## Issue 5: Error connect to EC2 with first login
 
 **Description:**
