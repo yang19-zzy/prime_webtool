@@ -19,7 +19,7 @@ import os
 
 @auth_bp.route("/login")
 def auth_login():
-    next_url = request.args.get("next", request.referrer or url_for("/"))
+    next_url = request.args.get("next", request.referrer or url_for("main.index"))
     flask_session["next_url"] = next_url
     redirect_uri = url_for("auth.auth_callback", _external=True)
 
