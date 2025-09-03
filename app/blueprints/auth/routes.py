@@ -62,27 +62,32 @@ def auth_callback():
         flask_session["user_info"] = user_info
         flask_session["user_id"] = user_info["user_id"]
 
-        # Check if the user is already in the database
-        # If not, create a new user
-        user = User.query.filter_by(user_id=user_info["user_id"]).first()
-        if not user:
-            user = User(
-                email=user_info["email"],
-                user_id=user_info["user_id"],
-                first_name=user_info["given_name"],
-                last_name=user_info["family_name"],
-            )
-            db.session.add(user)
-            db.session.commit()
-        login_user(user)
-        # check user role
-        user_role = UserRole.query.filter_by(user_id=user.user_id).first()
-        if not user_role:
-            user_role = UserRole(user_id=user.user_id, role="app_user")  # Default role
-            db.session.add(user_role)
-            db.session.commit()
+        try:
+            # Check if the user is already in the database
+            # If not, create a new user
+            user = User.query.filter_by(user_id=user_info["user_id"]).first()
+            if not user:
+                user = User(
+                    email=user_info["email"],
+                    user_id=user_info["user_id"],
+                    first_name=user_info["given_name"],
+                    last_name=user_info["family_name"],
+                )
+                db.session.add(user)
+                db.session.commit()
 
-        flask_session["user_role"] = user_role.role
+            # check user role
+            user_role = UserRole.query.filter_by(user_id=user.user_id).first()
+            if not user_role:
+                user_role = UserRole(user_id=user.user_id, role="app_user")  # Default role
+                db.session.add(user_role)
+                db.session.commit()
+
+            flask_session["user_role"] = user_role.role
+        except Exception as e:
+            current_app.logger.error(f"Error occurred while querying user info: {e}")
+            db.session.rollback()
+            flask_session["user_role"] = 'app_user' #default to app_user if db query fails
         print("this is user-info!!!!!!!!!:", user_info)
 
         next_url = flask_session.pop("next_url", request.args.get("state", "/"))
