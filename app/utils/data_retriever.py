@@ -11,14 +11,14 @@ def get_schemas_for_user(user_id):
     user = UserRole.query.filter_by(user_id=user_id).first()
     if not user:
         return []
-    is_in_lab = user.role == 'in-lab-user' or user.role == 'admin' or user.role == 'dev'
+    is_in_lab = user.in_lab_user or user.role == 'admin' or user.role == 'dev'
 
     schemas = object
     if is_in_lab:
         # If the user is a lab user, return all schemas
         schemas = SchemaAccess.query.all()
     else:
-        schemas = SchemaAccess.query.filter_by(limit_access=True).all()
+        schemas = SchemaAccess.query.filter_by(limited_access=True).all()
 
     return [i.schema_name for i in schemas]
 
@@ -67,15 +67,16 @@ def get_all_users():
 
 
 # functions for static data retrieval
-def get_table_options():
+def get_table_options(user_id):
     '''
     Get table options for data-viewer
     '''
+    user_schemas = get_schemas_for_user(user_id)
     # Logic to retrieve table options
-    options = TableColumns.query.order_by(
+    options = TableColumns.query.filter(TableColumns.data_schema.in_(user_schemas)).order_by(
         TableColumns.id, TableColumns.data_source, TableColumns.table_name
     ).all()
-    grouped = defaultdict(lambda: defaultdict(list))
+    grouped = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
     for opt in options:
-        grouped[opt.data_source][opt.table_name].append(opt.column_name)
+        grouped[opt.data_schema][opt.data_source][opt.table_name].append(opt.column_name)
     return grouped

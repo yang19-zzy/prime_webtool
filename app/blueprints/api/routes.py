@@ -53,8 +53,8 @@ def user_schemas(user_id):
 @api_bp.route("/data/view/table_options", methods=["GET"])
 @login_required
 def table_options():
-    options = get_table_options()
-    return jsonify({"table_options": options}), 200
+    options = get_table_options(current_user.user_id)
+    return jsonify({"table_select_options": options}), 200
 
 @api_bp.route("/data/view/merge", methods=["POST"])
 @login_required
