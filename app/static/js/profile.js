@@ -89,12 +89,12 @@ function displayUsers(data) {
         const row = document.createElement("tr");
 
         row.innerHTML = `
-          <td>${user.user_id}</td>
+          <td class="center-cell">${user.user_id}</td>
           <td>${user.first_name}</td>
           <td>${user.last_name}</td>
           <td>${user.email}</td>
-          <td class="center-toggle-cell">${user.role}</td>
-          <td class="center-toggle-cell">
+          <td class="center-cell">${user.role}</td>
+          <td class="center-cell">
             <label class="toggle-switch">
               <input type="checkbox" ${user.in_lab_user ? 'checked' : ''} onchange="toggleLabUser('${user.user_id}', ${i})">
               <span class="slider"></span>
