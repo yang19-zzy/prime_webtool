@@ -1,9 +1,3 @@
-function sayHello() {
-    alert("Hello World")
- }
-
-
-
 function toggleNav() {
     const sidenav = document.getElementById("mySidenav");
     const main = document.querySelector(".main-container");
@@ -71,6 +65,8 @@ function createRowSelectElement(labelText, selectName, selectCls, className, isM
     if (isMulti) {
         elementSelect.multiple = isMulti;
         elementSelect.classList.add("multi-select");
+        elementSelect.size = 1; // make the dropdown box the same size as single select
+        elementSelect.appendChild(addPlaceholder("Double click to modify selection"));
     } else {
         elementSelect.appendChild(addPlaceholder("Choose an option"));
     }
@@ -82,36 +78,6 @@ function createRowSelectElement(labelText, selectName, selectCls, className, isM
     return element;
 }
 
-function createRowTextElement(labelText, rowId, inputCls, elementCls) {
-    const elementLabel = document.createElement("label");
-    elementLabel.textContent = labelText;
-
-    const elementInput = document.createElement("input");
-    elementInput.type = "text";
-    elementInput.classList.add(...inputCls.split(" "));
-    elementInput.classList.add(rowId);
-    elementInput.readOnly = true;
-    elementInput.style.pointerEvents = "none";
-    
-    const element = document.createElement("div");
-    element.classList.add(...elementCls.split(" "));
-    element.append(elementLabel, elementInput);
-
-    setTimeout(() => {
-        const instance = new Choices(elementInput, {
-            removeItemButton: false,
-            placeholder: false,
-            addItems: true,
-            searchEnabled: false,
-            duplicateItemsAllowed: false,
-            shouldSort: false,
-            renderChoiceLimit: -1,
-            
-        });
-        rowChoicesMap[rowId] = instance;
-    }, 0);
-    return element;
-}
 
 function createNotesElement(className) {
     const noteLabel = document.createElement("label");
@@ -157,60 +123,7 @@ function getSessionData(key) {
     return JSON.parse(sessionStorage.getItem(key));
 }
 
-function populateParentOptions(selectElement, dataOption) {
-    for (const e in dataOption) {
-        selectElement.options[selectElement.options.length] = new Option(e, e);
-    }
-}
-
-function getLastFolderName(path) {
-    const parts = path.split('/').filter(Boolean);
-    return parts[parts.length - 1];
-}
-
-
-function createModal(title, rowId, modalType, modalCls) {
-    const modalDiv = document.createElement('div');
-    modalDiv.id = `${modalType}Modal_${rowId}`;
-    modalDiv.classList.add(modalCls, "modal");
-    modalDiv.style.display = "none";
-
-    const modalContent = document.createElement('div');
-    modalContent.classList.add("modal-content");
-
-    const modalClose = document.createElement("button");
-    modalClose.innerText = "Deselect All";
-    modalClose.id = `deselectModalBtn_${rowId}`;
-    modalClose.classList.add(..."deselect btn closebtn".split(" "));
-
-    const modalTitle = document.createElement("h3");
-    modalTitle.innerHTML = title;
-
-    const modalContainer = document.createElement("div");
-    modalContainer.id = `${modalType}CheckboxContainer_${rowId}`;
-    modalContainer.classList.add("modal-container");
-    // modalContainer.textContent = "Keep column(s)???";
-
-    const modalBtn = document.createElement("button");
-    modalBtn.id = `${modalType}Confirm_${rowId}`;
-    modalBtn.classList.add("btn");
-    modalBtn.innerText = "Done";
-
-    modalDiv.appendChild(modalContent);
-    modalContent.append(modalClose, modalTitle, modalContainer, modalBtn);
-
-    return modalDiv;
-}
-
-
-function logoutAndStay() {
-    const currentUrl = window.location.href;
-    window.location.href = `/logout?state=${encodeURIComponent(currentUrl)}`;
-}
-
-function logoutToHome() {
-    fetch('/auth/logout', { method: 'POST' })
-        .finally(() => {
-            window.location.href = "/";
-        });
+async function isLoggedIn() {
+    const response = await fetch('/auth/session-check', { method: 'GET', credentials: 'include' });
+    return response.ok;
 }

@@ -3,48 +3,43 @@ const rowChoicesMap = {};
 let rowIdCounter = 1;
 
 // main
-document.addEventListener("DOMContentLoaded", function () {
-    const loginBtn = document.getElementById("login-btn");
-    if (loginBtn) {
-        loginBtn.addEventListener('click', function() {
-            redirectToLogin();
-        })
+isLoggedIn().then(loggedIn => {
+    if (loggedIn) {
+        initializeDataViewer();
+    } else {
+        console.warn("Not logged in yet.");
     }
-    (async () => {
-        await initializeDataViewer();
-    })();
 });
 
 
 // functions
-function initializeDataViewer() {
+async function initializeDataViewer() {
+    const resp = await fetch(`/api/data/view/table_options`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+    });
+    if (!resp.ok) {
+        console.error("Failed to fetch table options:", resp.statusText);
+        return;
+    }
+    const result = await resp.json();
+    console.log("Table options fetched:", result);
+    const data = result.table_select_options;
 
-        const response = fetchWithAuth('/auth/session-check');
-        if (!response || response.status === 401) {
-            console.warn("User not logged in. Skipping fetchWithAuth.");
-            return;
-        }
-
-        const data = getSessionData('data-viewer-select-options');
-        if (data) {
-            addTableSelectionRow(data); // initial row
-        } else {
-            fetchWithAuth("/data_viewer/table_options")
-                .then(async response  => {
-                    const result = await response.json();
-                    if (!result || !result.data_source) return;
-                    saveSessionData('data-viewer-select-options', result.data_source);
-                    addTableSelectionRow(result.data_source); // initial row
-                })
-                .catch(error => console.error("Error fetching select options:", error));
-        }
-
+    if (data) {
+        addTableSelectionRow(data); // initial row
+    } else {
+        return;
+    }
 }
 
 
 function addTableSelectionRow(dataOption={}) {
     const tableSelectionContainer = document.getElementById("viewer-selection-container");
-    console.log(tableSelectionContainer);
+    // console.log(tableSelectionContainer);
     if (!tableSelectionContainer) {
         console.error("Table selection container not found! Please check html file.");
         return;
@@ -54,14 +49,12 @@ function addTableSelectionRow(dataOption={}) {
     const rowId = `row-${rowIdCounter++}`;
 
     const rowDiv = createRowDiv(rowId, "table-selection-row");
-    
+
+    const dataSchema = createRowSelectElement("Data schema", "data_schema[]", "table_selection data_schema", "table-selection-row-element");
     const dataSource = createRowSelectElement("Data source", "data_source[]", "table_selection data_source", "table-selection-row-element");
     const tableSource = createRowSelectElement("Table", "table[]", "table_selection table_sgl", "table-selection-row-element");
-    // const colFilter = createRowSelectElement("Selected column(s)", "col_lst[]", "table_selection col_filter", "table-selection-row-element", true);
-    const colFilter = createRowTextElement("Selected column(s)", rowId, "col_filter selected_cols", "table-selection-row-element");
+    const colFilter = createRowSelectElement("Selected column(s)", "col_lst[]", "table_selection col_filter", "table-selection-row-element", true);
     const colPop = createModal("Keep column(s)", rowId, "colSelection", "table-selection-row-element");
-    console.log(colPop);
-
     const rmBtn = createRemoveButton(rowId, rowIdCounter, "Remove table");
 
     const subTopRowDiv = document.createElement("div");
@@ -69,74 +62,80 @@ function addTableSelectionRow(dataOption={}) {
     const subBottomRowDiv = document.createElement("div");
     subBottomRowDiv.classList.add("bottom");
 
-    subTopRowDiv.append(dataSource, tableSource, colPop, rmBtn);
-    subBottomRowDiv.append(colFilter);
+    subTopRowDiv.append(dataSchema, dataSource, tableSource, colPop, colFilter, rmBtn);
+    // subBottomRowDiv.append(colFilter);
 
-    rowDiv.append(subTopRowDiv, subBottomRowDiv);
+    // rowDiv.append(subTopRowDiv, subBottomRowDiv);
+    rowDiv.append(subTopRowDiv);
     tableSelectionContainer.appendChild(rowDiv);
-
-    populateParentOptions(dataSource.querySelector("select"), dataOption);
-    setupTableChangeHandler(dataSource.querySelector("select"), tableSource.querySelector("select"), dataOption, colFilter.querySelector("input"), rowId);
-    // the columns should be only populated if a table is selected
-}
-
-
-function getTableDataOptions() {
-    return getSessionData("data-viewer-select-options");
-}
-
-function setupTableChangeHandler(dataSourceSelect, tableSourceSelect, dataOption, colFilterSelect, rowId) {
-    console.log("dataOption.....", dataOption);
-    let selectedDataSource = dataSourceSelect.value;
-    console.log(selectedDataSource);
-    console.log(Object.keys(dataOption));
-    // console.log(Object.keys(dataOption[selectedDataSource]));
-    dataSourceSelect.onchange = function() {
-        tableSourceSelect.length = 1;
-        // tableSourceSelect.options[0] = new Option("Choose an option", "");
-        selectedDataSource = this.value;
-        console.log(this.value);
-        const tableList = Object.keys(dataOption[selectedDataSource]) || [];
-        console.log("let's see table list...", tableList);
-        tableList.forEach(e => {
-            console.log("table name...", e, e.split('/'), e.split('/')[-2]);
-            tableSourceSelect.options[tableSourceSelect.options.length] = new Option(e, e);
-        })
-
-    }
     
-    //get columns once table selected
-    tableSourceSelect.onchange = function () {
-        const selectedTable = this.value;
-        const sourceToUse = dataSourceSelect.value || selectedDataSource;
-        fetchColumns(sourceToUse, selectedTable, colFilterSelect, rowId);
-    }
+    populateOptions(dataSchema.querySelector("select"), dataOption);
+    dataSchema.querySelector("select").onchange = function() {
+        dataSource.querySelector("select").length = 1;
+        tableSource.querySelector("select").length = 1;
+        dataSource.querySelector("select").options[0] = new Option("Choose an option", "");
+        tableSource.querySelector("select").options[0] = new Option("Choose an option", "");
+        populateOptions(dataSource.querySelector("select"), dataOption[dataSchema.querySelector("select").value] || {});
+    };
+    dataSource.querySelector("select").onchange = function() {
+        tableSource.querySelector("select").length = 1;
+        tableSource.querySelector("select").options[0] = new Option("Choose an option", "");
+        populateOptions(tableSource.querySelector("select"), (dataOption[dataSchema.querySelector("select").value] || {})[dataSource.querySelector("select").value] || {});
+    };
+    tableSource.querySelector("select").onchange = function() {
+        openColumnModal(
+            rowId, 
+            (dataOption[dataSchema.querySelector("select").value] || {})[dataSource.querySelector("select").value][tableSource.querySelector("select").value] || [], 
+            (selectedCols) => {
+                console.log("Selected columns for", rowId, selectedCols);
 
+            }
+        );
+    };
 }
 
 
-function fetchColumns(schema, table, colFilterSelect, rowId) {
-    // fetch data and save in sessionStorage first
-    const key = `table_data_${schema}_${table}`;
 
-    if (sessionStorage.getItem(key) === null) {
-        console.log('fetchdata', key, 'session not exists');
-        const tableOptions = getSessionData('data-viewer-select-options');
-        const columns = tableOptions[schema][table];
-        saveSessionData(`table_data_${schema}_${table}`, columns);
-
+// helper functions
+function populateOptions(selectElement, dataOption) {
+    for (const e in dataOption) {
+        selectElement.options[selectElement.options.length] = new Option(e, e);
     }
-    const columnNames = getSessionData(key);
-    // const columnNames = Object.keys(data);
-
-    openColumnModal(colFilterSelect.closest(".table-selection-row").id, columnNames, (selectedCols) => {
-        console.log("Selected columns for", rowId, selectedCols);
-    });
-
-    console.log('column names:', columnNames);
-    
 }
 
+
+function createModal(title, rowId, modalType, modalCls) {
+    const modalDiv = document.createElement('div');
+    modalDiv.id = `${modalType}Modal_${rowId}`;
+    modalDiv.classList.add(modalCls, "modal");
+    modalDiv.style.display = "none";
+
+    const modalContent = document.createElement('div');
+    modalContent.classList.add("modal-content");
+
+    const modalClose = document.createElement("button");
+    modalClose.innerText = "Deselect All";
+    modalClose.id = `deselectModalBtn_${rowId}`;
+    modalClose.classList.add(..."deselect btn closebtn".split(" "));
+
+    const modalTitle = document.createElement("h3");
+    modalTitle.innerHTML = title;
+
+    const modalContainer = document.createElement("div");
+    modalContainer.id = `${modalType}CheckboxContainer_${rowId}`;
+    modalContainer.classList.add("modal-container");
+    // modalContainer.textContent = "Keep column(s)???";
+
+    const modalBtn = document.createElement("button");
+    modalBtn.id = `${modalType}Confirm_${rowId}`;
+    modalBtn.classList.add("btn");
+    modalBtn.innerText = "Done";
+
+    modalDiv.appendChild(modalContent);
+    modalContent.append(modalClose, modalTitle, modalContainer, modalBtn);
+
+    return modalDiv;
+}
 
 
 function openColumnModal(rowId, columns, onConfirm) {
@@ -144,8 +143,6 @@ function openColumnModal(rowId, columns, onConfirm) {
     const container = document.getElementById(`colSelectionCheckboxContainer_${rowId}`);
     const confirmBtn = document.getElementById(`colSelectionConfirm_${rowId}`);
     const closeBtn = document.getElementById(`deselectModalBtn_${rowId}`);
-
-    // container.innerHTML = "";
 
     columns.forEach(col => {
         const checkRow = document.createElement('div');
@@ -165,26 +162,17 @@ function openColumnModal(rowId, columns, onConfirm) {
     });
 
     confirmBtn.onclick = function () {
-        const selected = Array.from(container.querySelectorAll("input:checked")).map(cb => cb.value);
-        sessionStorage.setItem(`selectedCols_${rowId}`, JSON.stringify(selected));
+        const colFilterSelect = document.querySelector(`#${rowId} .col_filter`);
+        colFilterSelect.length = 0;  // Clear existing options
+
+        const selected = {};
+        Array.from(container.querySelectorAll("input:checked")).forEach(cb => {
+            selected[cb.value] = cb.value;
+        });
+        // sessionStorage.setItem(`selectedCols_${rowId}`, JSON.stringify(selected));
         modal.style.display = "none";
-
-        // const selectElem = document.querySelector(`.${rowId}`, ".selected_cols", "input");
-        // const choices = selectElem.closest('.choices').choices;
-        // const choices = document.querySelector(`#${rowId}`).querySelector('.choices');
-        const choices = rowChoicesMap[rowId];
-        // Check if Choices has already been initialized
-        
-        choices.setValue(selected);
-        choices.disable();
-        // selected.forEach(col => {
-        //     choices.setValue([{ value: col, label: col }]);
-        //     console.log('set value', col, choices);
-        // });
-
-        rowChoicesMap[rowId] = choices;
-        console.log("Choices instance", choices);
-
+        console.log("Selected columns:", selected);
+        populateOptions(colFilterSelect, selected);
 
         if (onConfirm) {onConfirm(selected)};
     };
@@ -194,14 +182,21 @@ function openColumnModal(rowId, columns, onConfirm) {
             checkbox.checked = false;
         });
     };
-    // window.onclick = (event) => {
-    //     if (event.target == modal) {
-    //         modal.style.display = "none";
-    //     }
-    // };
 
     modal.style.display = "block";
 }
+
+document.addEventListener('dblclick', function(event) {
+    const row = event.target.closest('.table-selection-row');
+    if (row) {
+        const rowId = row.id;
+        const modal = document.getElementById(`colSelectionModal_${rowId}`);
+        const selectedTable = row.querySelector('[name="table[]"]').value;
+        if (modal && selectedTable != "Choose an option" && selectedTable != "") {
+            modal.style.display = "block";
+        }
+    }
+});
 
 
 function displayMergedTable() {

@@ -253,31 +253,15 @@ button:hover {
   flex: 1 1 auto;
   min-width: 200px;
   margin: 5px 5px 0;
-  /* border: 1px solid red; */
-  /* margin-right: 5px; */
 }
-
-/* 
-.table-selection-row > .top > button {
-  margin-left: 10px;
-} */
-
 .multi-select, .table-selection {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background-color: #f6f7fa;
-  font-size: 1rem;
-  line-height: 1.2;
   appearance: none;       /* Removes native UI in some browsers */
   overflow-y: scroll;
   overflow-x: scroll;
 }
-
-.multi-select option {
-  padding: 0.5rem;
+.multi-select::-webkit-scrollbar {
+  display: none;
 }
-
 
 /* Modal */
 .modal {
@@ -573,7 +557,7 @@ input:checked + .slider {
 input:checked + .slider:before {
   transform: translateX(22px);
 }
-.center-toggle-cell {
+.center-cell {
   text-align: center;
   vertical-align: middle;
 }

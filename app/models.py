@@ -26,6 +26,7 @@ class TableColumns(db.Model):
     table_name = db.Column(db.String(100), nullable=False)
     column_name = db.Column(db.String(100), nullable=False)
     data_source = db.Column(db.String(100), nullable=False)
+    data_schema = db.Column(db.String(100), nullable=False)
 
 
 class MergeHistory(db.Model):
