@@ -66,26 +66,6 @@ def get_table_options():
     return jsonify({"data_source": grouped})
 
 
-# @viewer_bp.route('/data', methods=['POST', 'GET'])
-# def get_tables_from_s3():
-#     if not flask_session.get('user_info'):
-#         return jsonify({'error': 'Unauthorized'}), 401
-#     # data = request.get_json()
-#     # print("Received viewer request:", data)
-#     # process your S3 fetch here...
-#     schema = request.args.get('schema')
-#     table = request.args.get('table')
-#     print('schema:', schema)
-#     print('table:', table)
-
-#     # if schema-table is stored in session
-#     session_table_key = flask_session.get(f'table_data_{schema}-{table}')
-#     df = get_s3_data(s3=get_s3(), bucket=get_s3_bucket(), schema=schema, table=table)
-#     data = df.to_dict(orient='records')
-#     flask_session[session_table_key] = data
-#     return jsonify({"message": "Data fetched successfully", "data": data})
-
-
 @viewer_bp.route("/merge", methods=["POST", "GET"])
 def merge_data():
     if not flask_session.get("user_info"):

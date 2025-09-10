@@ -125,13 +125,13 @@ def create_app(test_config=None):
 
     # Initialize Flask-Login
     login_manager.init_app(app)
-    login_manager.login_view = "main.index"
-    @login_manager.unauthorized_handler
-    def unauthorized_callback():
-        if request.path.startswith('/api/'):
-            return jsonify({'error': 'Unauthorized'}), 401
-        else:
-            return redirect(url_for('main_page'))
+    # login_manager.login_view = "main.index"
+    # @login_manager.unauthorized_handler
+    # def unauthorized_callback():
+    #     if request.path.startswith('/api/'):
+    #         return jsonify({'error': 'Unauthorized'}), 401
+    #     else:
+    #         return redirect(url_for('main.index'))
 
     # Initialize Flask-Caching
     cache = Cache(app, config={
