@@ -13,8 +13,8 @@ class FormOptions(db.Model):
     value = db.Column(db.String(255), nullable=False)
 
 
-class TableColumns(db.Model):
-    __tablename__ = "table_columns"
+class ViewerOptions(db.Model):
+    __tablename__ = "viewer_options"
     __table_args__ = (
         UniqueConstraint(
             "table_name", "column_name", "data_source", name="uq_table_columns"
@@ -22,11 +22,11 @@ class TableColumns(db.Model):
         {"schema": "backend"},
     )
 
-    id = db.Column(db.Integer, primary_key=True)
+    row_id = db.Column(db.Integer, primary_key=True)
+    data_schema = db.Column(db.String(100), nullable=False)
+    data_source = db.Column(db.String(100), nullable=False)
     table_name = db.Column(db.String(100), nullable=False)
     column_name = db.Column(db.String(100), nullable=False)
-    data_source = db.Column(db.String(100), nullable=False)
-    data_schema = db.Column(db.String(100), nullable=False)
 
 
 class MergeHistory(db.Model):
@@ -121,8 +121,8 @@ class UserActivity(db.Model):
         return f"<UserActivity {self.row_id} - {self.user_id} - {self.action}>"
     
 
-class SchemaAccess(db.Model):
-    __tablename__ = "schema_access"
+class UserSchemaAccess(db.Model):
+    __tablename__ = "user_schema_access"
     __table_args__ = {"schema": "backend"}
 
     row_id = db.Column(db.Integer, primary_key=True)

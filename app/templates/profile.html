@@ -6,11 +6,6 @@
 <script type="text/javascript" src="{{ url_for('static', filename='js/profile.js') }}"></script>
 {% endblock %}
 
-{% block logout_btn %}
-{% if session.user_info %}
-<a href="{{ url_for('auth.auth_logout') }}"><button type="button" class="btn logout-btn menu__link" id="logout-btn" onclick="logoutToHome()">Log out</button></a>
-{% endif %}
-{% endblock %}
 
 {% block content %}
 <div>
@@ -20,9 +15,6 @@
             <p>Please log in first.</p>
             <a href="{{ url_for('auth.auth_login', next=request.path, provider='google') }}"><button type="button" class="btn login-btn" id="login-btn">Log in</button></a>
         
-        {% elif session.user_role != 'admin' and session.user_role != 'dev' %}
-            <p>Sorry, you have to be an Admin or Developer to access this page.</p>
-
         {% else %}
             <div id="profile-container">
                 <!-- Populate user profile -->

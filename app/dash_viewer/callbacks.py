@@ -16,17 +16,26 @@ def register_callbacks(app):
             raise PreventUpdate
 
         key = pathname.replace("/dash_viewer/", "")
+        print('this is pathname', pathname)
+        print(key)
         if not key:
             raise PreventUpdate
 
         r = get_redis()
+        # value = r.get(f"merged_data:{key}")
         value = r.get(key)
         if not value:
-            return html.Div("Data not found")
+            return html.Div("Data not found... why!!!??????")
 
-        df = pd.DataFrame(
-            json.loads(json.loads(value))
-        )  # double decode due to how you saved
+        try:
+            if isinstance(value, bytes):
+                data = json.loads(value.decode("utf-8"))
+            else:
+                data = json.loads(value)
+            df = pd.DataFrame(data)
+        except (json.JSONDecodeError, ValueError) as e:
+            return html.Div(f"Error loading data: {str(e)}")
+
         return dash_table.DataTable(
             id="merged-table",
             columns=[{"name": i, "id": i} for i in df.columns],

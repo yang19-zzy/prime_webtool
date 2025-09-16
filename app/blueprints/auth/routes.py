@@ -105,7 +105,12 @@ def auth_callback():
 @auth_bp.route("/logout")
 def auth_logout():
     # Clear user session and cookies
-    next_url = request.args.get("state") or request.referrer or "/"
+    # Determine where to redirect after logout
+    referrer = request.referrer or "/"
+    if "profile" in referrer:
+        next_url = url_for("main.index")
+    else:
+        next_url = request.args.get("state") or referrer or "/"
     flask_session.clear()
     logout_user()
     response = make_response(redirect(next_url))
