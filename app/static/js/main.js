@@ -16,12 +16,16 @@ function toggleNav() {
     }
 }
 
-function addPlaceholder(msg) {
+function addPlaceholder(msg, isMulti=false) {
     const placeholder = document.createElement("option");
     placeholder.value = "";
     placeholder.disabled = true;
     // placeholder.hidden = true;
-    placeholder.selected = true;
+    if (isMulti) {
+        placeholder.selected = false;
+    } else {
+        placeholder.selected = true;
+    }
     placeholder.classList.add("placeholder");
     placeholder.textContent = msg;
     return placeholder;
@@ -33,21 +37,6 @@ function removeRow(rowId) {
     if (row) row.remove();
 }
 
-function saveCookie(obj, name) {
-    document.cookie = `${name}=${JSON.stringify(obj)};`;
-}
-
-function get_cookie(name) {
-    const cookieList = decodeURIComponent(document.cookie).split(';');
-    for (let c of cookieList) {
-        c = c.trim();
-        if (c.startsWith(name)) {
-            return c.substring(name.length);
-        }
-    }
-    return "";
-}
-
 
 function createRowDiv(rowId, className) {
     const rowDiv = document.createElement("div");
@@ -56,7 +45,7 @@ function createRowDiv(rowId, className) {
     return rowDiv;
 }
 
-function createRowSelectElement(labelText, selectName, selectCls, className, isMulti=false) {
+function createRowSelectElement(labelText, selectName, selectCls, className, isMulti=false, elementId="") {
     const elementLabel = document.createElement("label");
     elementLabel.textContent = labelText;
 
@@ -66,7 +55,8 @@ function createRowSelectElement(labelText, selectName, selectCls, className, isM
         elementSelect.multiple = isMulti;
         elementSelect.classList.add("multi-select");
         elementSelect.size = 1; // make the dropdown box the same size as single select
-        elementSelect.appendChild(addPlaceholder("Double click to modify selection"));
+        elementSelect.appendChild(addPlaceholder("Double click to modify selection", true));
+        elementSelect.disabled = false;
     } else {
         elementSelect.appendChild(addPlaceholder("Choose an option"));
     }
@@ -74,6 +64,7 @@ function createRowSelectElement(labelText, selectName, selectCls, className, isM
     const element = document.createElement("div");
     element.classList.add(className);
     element.append(elementLabel, elementSelect);
+    elementSelect.id = elementId
 
     return element;
 }
@@ -102,16 +93,16 @@ function createRemoveButton(rowId, rowCount, title) {
     rmBtn.classList.add("remove-btn", "btn");
     rmBtn.title = title;
 
-    // if (rowCount > 1) {
-    //     rmBtn.onclick = () => removeRow(rowId);
-    // } else {
-    //     // rmBtn.style.display = "none";
-    //     rmBtn.style.visibility = "hidden";
-    // }
-
     rmBtn.onclick = () => removeRow(rowId);
 
     return rmBtn;
+}
+
+
+function populateOptions(selectElement, dataOption) {
+    for (const e in dataOption) {
+        selectElement.options[selectElement.options.length] = new Option(e, e);
+    }
 }
 
 

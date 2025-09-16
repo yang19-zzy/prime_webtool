@@ -100,35 +100,10 @@ function displayUsers(data) {
               <span class="slider"></span>
             </label>
           </td>
-        `
-        // const userIdCell = document.createElement("td");
-        // userIdCell.textContent = user.user_id;
-        // row.appendChild(userIdCell);
-
-        // const firstNameCell = document.createElement("td");
-        // firstNameCell.textContent = user.first_name;
-        // row.appendChild(firstNameCell);
-
-        // const lastNameCell = document.createElement("td");
-        // lastNameCell.textContent = user.last_name;
-        // row.appendChild(lastNameCell);
-
-        // const emailCell = document.createElement("td");
-        // emailCell.textContent = user.email;
-        // row.appendChild(emailCell);
-
-        // const roleCell = document.createElement("td");
-        // roleCell.textContent = user.role;
-        // row.appendChild(roleCell);
-
-        // const inLabCell = document.createElement("td");
-        // inLabCell.textContent = user.in_lab_user ? "Yes" : "No";
-        // row.appendChild(inLabCell);
-
+        `;
         tbody.appendChild(row);
     });
     table.appendChild(tbody);
-
     userContainer.appendChild(table);
 }
 

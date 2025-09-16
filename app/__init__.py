@@ -2,7 +2,7 @@
 
 from config import *
 
-from flask import Flask, jsonify, request, url_for, redirect
+from flask import Flask, jsonify, redirect, request, render_template, url_for
 from flask_caching import Cache
 from flask_cors import CORS
 from flask_login import LoginManager
@@ -15,7 +15,7 @@ from app.models import *
 from app.utils.aws_tools import  connect_s3#, connect_lambda,
 from app.utils.activity_logger import register_activity_hooks
 
-from app.extensions import db, oauth, login_manager, set_google, set_google_flow, set_s3, set_s3_bucket, set_s3_metadata, set_email_list
+from app.extensions import db, oauth, login_manager, set_google, set_google_flow, set_s3, set_s3_bucket, set_s3_metadata, set_email_list, set_redis
 from google_auth_oauthlib.flow import InstalledAppFlow
 
 from app.blueprints.api import api_bp
@@ -119,19 +119,24 @@ def create_app(test_config=None):
     except Exception as e:
         print(f"Redis connection failed: {e}")
     app.extensions["redis"] = redis_client
+    set_redis(redis_client)
 
     # Initialize ProxyFix middleware
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1, x_port=1, x_proto=1)
 
     # Initialize Flask-Login
     login_manager.init_app(app)
-    # login_manager.login_view = "main.index"
-    # @login_manager.unauthorized_handler
-    # def unauthorized_callback():
-    #     if request.path.startswith('/api/'):
-    #         return jsonify({'error': 'Unauthorized'}), 401
-    #     else:
-    #         return redirect(url_for('main.index'))
+    login_manager.login_view = None
+    login_manager.login_message = None
+    login_manager.session_protection = "strong"
+    @login_manager.unauthorized_handler
+    def unauthorized_callback():
+        if request.path.startswith('/api/'):
+            return jsonify({'error': 'Please log in first', 'login_required': True}), 401
+        else:
+            return redirect(url_for('main.index'))
+
+
 
     # Initialize Flask-Caching
     cache = Cache(app, config={

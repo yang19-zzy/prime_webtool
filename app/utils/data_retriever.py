@@ -16,9 +16,9 @@ def get_schemas_for_user(user_id):
     schemas = object
     if is_in_lab:
         # If the user is a lab user, return all schemas
-        schemas = SchemaAccess.query.all()
+        schemas = UserSchemaAccess.query.all()
     else:
-        schemas = SchemaAccess.query.filter_by(limited_access=True).all()
+        schemas = UserSchemaAccess.query.filter_by(limited_access=True).all()
 
     return [i.schema_name for i in schemas]
 
@@ -73,10 +73,26 @@ def get_table_options(user_id):
     '''
     user_schemas = get_schemas_for_user(user_id)
     # Logic to retrieve table options
-    options = TableColumns.query.filter(TableColumns.data_schema.in_(user_schemas)).order_by(
-        TableColumns.id, TableColumns.data_source, TableColumns.table_name
+    options = ViewerOptions.query.filter(ViewerOptions.data_schema.in_(user_schemas)).order_by(
+        ViewerOptions.row_id, ViewerOptions.data_source, ViewerOptions.table_name
     ).all()
     grouped = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
     for opt in options:
         grouped[opt.data_schema][opt.data_source][opt.table_name].append(opt.column_name)
+    return grouped
+
+
+def get_tracker_options(user_id):
+    options = FormOptions.query.order_by(
+        FormOptions.field_name, FormOptions.item_num
+    ).all()
+    grouped = defaultdict(list)
+    device_map = defaultdict(list)
+
+    for opt in options:
+        if opt.field_name == "device":
+            device_map[opt.value].append(opt.item_num)
+        elif opt.value not in grouped[opt.field_name]:
+            grouped[opt.field_name].append(opt.value)
+    grouped["device"] = device_map
     return grouped

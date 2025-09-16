@@ -152,7 +152,7 @@ function addRow(dataOption={}, bodyDataOption={}) {
     rowDiv.append(device, deviceNum, notes, rmBtn);
     deviceContainer.appendChild(rowDiv);
 
-    populateParentOptions(device.querySelector("select"), dataOption);
+    populateOptions(device.querySelector("select"), dataOption);
     setupDeviceChangeHandler(device.querySelector("select"), deviceNum.querySelector("select"), dataOption);
     // populateBodyPartOptions(bodyPart.querySelector("select"), bodyDataOption);
 }
