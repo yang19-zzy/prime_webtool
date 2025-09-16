@@ -1,24 +1,18 @@
 # app/blueprints/api/routes.py
 from . import api_bp
 from flask import (
-    app,
     json,
     request,
-    redirect,
-    url_for,
     session as flask_session,
-    make_response,
-    jsonify,
-    render_template,
-    current_app,
+    jsonify
 )
 from flask_login import current_user, login_required
-from app.utils.merge_q_generator import merge_q_generator
-from app.utils.data_retriever import *
-from app.extensions import db, get_redis
+from app.extensions import db, get_redis, get_email_list
 from app.models import UserRole, MergeHistory
+from app.utils.data_retriever import *
+from app.utils.merge_q_generator import merge_q_generator
+from app.utils.emailer import send_email
 import json as py_json
-import hashlib
 from sqlalchemy import text
 
 
@@ -62,11 +56,13 @@ def table_options():
     options = get_table_options(current_user.user_id)
     return jsonify({"table_select_options": options}), 200
 
+
 @api_bp.route("/data/get/tracker_options", methods=["GET"])
 @login_required
 def tracker_options():
     options = get_tracker_options(current_user.user_id)
     return jsonify({"tracker_select_options": options}), 200
+
 
 @api_bp.route("/data/action/merge", methods=["POST"])
 @login_required
@@ -93,11 +89,34 @@ def merge_data():
     db.session.commit()
     return jsonify({"message": "Merge successful", "redis_key": redis_key}), 200
 
-@api_bp.route("/data/action/download/<key>", methods=["GET"])
+# @api_bp.route("/data/action/download/<key>", methods=["GET"])
+# @login_required
+# def download_merged_data(key):
+#     redis_client = get_redis()
+#     merged_data = redis_client.get(key)
+#     if not merged_data:
+#         return jsonify({"error": "No merged data found"}), 404
+#     return jsonify({"data": py_json.loads(merged_data)}), 200
+
+@api_bp.route("/data/action/submit_tracker_form", methods=["POST"])
 @login_required
-def download_merged_data(key):
-    redis_client = get_redis()
-    merged_data = redis_client.get(key)
-    if not merged_data:
-        return jsonify({"error": "No merged data found"}), 404
-    return jsonify({"data": py_json.loads(merged_data)}), 200
+def submit_tracker_form():
+    form_data = request.json
+    metadata = form_data.get("metadata", {})
+    # devices = form_data.get("devices", [])
+    # form_owner = metadata.get("form_owner") or current_user.user_id
+    subject_id = metadata.get("subject_id")
+
+    send_email(
+        recipient=get_email_list(),
+        subject="⚠️ New Form Submitted [PRIME Lab In-lab Tracker]",
+        message_text=f"PRIME Lab In-lab Tracker\n\tSubject ID: {subject_id}\n\tSubmitter: {current_user.user_id} {'' if not current_user.first_name else f'({current_user.first_name})'}",
+        credentials=flask_session["google_credentials"],
+    )
+    new_form = TrackerForm(
+        form_owner=current_user.user_id, subject_id=subject_id, form_data=form_data, timestamp=db.func.now()
+    )
+    db.session.add(new_form)
+    db.session.commit()
+
+    return jsonify({"message": "Tracker form submitted successfully"}), 200
