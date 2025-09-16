@@ -4,6 +4,7 @@ wheel
 dotenv
 
 Flask
+Flask-Caching
 Flask-Cors
 Flask-Login
 Flask-Migrate

@@ -16,18 +16,13 @@
     <script type = "text/javascript" src = "{{ url_for('static', filename = 'js/main.js') }}" ></script>
     <script type = "text/javascript" src = "{{ url_for('static', filename = 'js/fetchWithAuth.js') }}" ></script>
 
-    <!-- <script src="https://kit.fontawesome.com/073dbba3fe.js" crossorigin="anonymous"></script> -->
     {% block scripts %}{% endblock %}
 
 </head>
 <body>
-    <!-- <input type = "button" onclick = "sayHello()" value = "Say Hello" />
-    <span onclick="openNav()"><i class="fa fa-bars"></i></span> -->
-    <!-- <button class="menu-toggle open" id="nav-btn" onclick="toggleNav()">☰&times;</button> -->
     <button class="menu-show" id="menu-show-btn" onclick="toggleNav()">☰</button>
 
     <nav class="nav sidenav open" id="mySidenav">
-        <!-- <div href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</div> -->
         <button class="menu-toggle" onclick="toggleNav()">×</button>
         <h2>Menu</h2>
         <a href="{{ url_for('main.index') }}"><div class="menu__link">🏠 Home</div></a>
@@ -35,7 +30,10 @@
         <a href="{{ url_for('viewer.data_viewer') }}"><div class="menu__link">📋 Data Viewer</div></a>
         <a href="{{ url_for('tools.data_tools') }}"><div class="menu__link">⚙️ Tools</div></a>
         <a href="{{ url_for('validator.validate') }}"><div class="menu__link">⚠️ Test Validator</div></a>
-        {% block logout_btn %}{% endblock %}
+        {% if session.user_info %}
+        <a href="{{ url_for('profile.load_profile') }}"><div class="menu__link">👤 Profile</div></a>
+        <a href="{{ url_for('auth.auth_logout') }}"><button type="button" class="btn logout-btn menu__link" id="logout-btn" onclick="logoutAndStay()">Log out</button></a>
+        {% endif %}
     </nav>
 
     

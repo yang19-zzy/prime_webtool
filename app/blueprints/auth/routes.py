@@ -10,7 +10,8 @@ from flask import (
     render_template,
     current_app,
 )
-from app.extensions import get_google_flow, db, get_email_list
+from flask_login import login_user, logout_user, current_user
+from app.extensions import get_google_flow, db, get_email_list, login_manager
 from app.models import User, UserRole
 from sqlalchemy import text, inspect
 import requests
@@ -81,7 +82,7 @@ def auth_callback():
                 user_role = UserRole(user_id=user.user_id, role="app_user")  # Default role
                 db.session.add(user_role)
                 db.session.commit()
-
+            login_user(user)
             flask_session["user_role"] = user_role.role
         except Exception as e:
             current_app.logger.error(f"Error occurred while querying user info: {e}")
@@ -104,10 +105,15 @@ def auth_callback():
 @auth_bp.route("/logout")
 def auth_logout():
     # Clear user session and cookies
-    next_url = request.args.get("state") or request.referrer or "/"
+    # Determine where to redirect after logout
+    referrer = request.referrer or "/"
+    if "profile" in referrer:
+        next_url = url_for("main.index")
+    else:
+        next_url = request.args.get("state") or referrer or "/"
     flask_session.clear()
+    logout_user()
     response = make_response(redirect(next_url))
-    # response.delete_cookie('logged_in')
     return response
 
 
@@ -132,6 +138,11 @@ def session_check():
                 "user_role": flask_session["user_role"],
                 "email_list": get_email_list() or [],
             }
-        )
+        ), 200
     else:
-        return jsonify({'logged_in': False}), 401
+        return jsonify({"logged_in": False}), 401
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.filter(User.user_id == user_id).first()

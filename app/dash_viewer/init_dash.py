@@ -1,4 +1,4 @@
-# app/dash_app/init_dash.py
+# app/dash_viewer/init_dash.py
 from dash import Dash
 from app.dash_viewer.layout import create_layout
 from app.dash_viewer.callbacks import register_callbacks
