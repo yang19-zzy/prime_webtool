@@ -10,7 +10,7 @@ from flask import (
     render_template,
     current_app,
 )
-from flask_login import login_user, logout_user, current_user
+from flask_login import login_required, login_user, logout_user, current_user
 from app.extensions import get_google_flow, db, get_email_list, login_manager
 from app.models import User, UserRole
 from sqlalchemy import text, inspect
@@ -103,18 +103,18 @@ def auth_callback():
 
 
 @auth_bp.route("/logout")
+@login_required
 def auth_logout():
     # Clear user session and cookies
     # Determine where to redirect after logout
-    referrer = request.referrer or "/"
-    if "profile" in referrer:
+    if "profile" in request.referrer:
         next_url = url_for("main.index")
     else:
-        next_url = request.args.get("state") or referrer or "/"
+        next_url = request.referrer or "/"
     flask_session.clear()
     logout_user()
-    response = make_response(redirect(next_url))
-    return response
+    # response = make_response(redirect(next_url))
+    return redirect(next_url)
 
 
 @auth_bp.route("/db_test", methods=["GET"])
