@@ -2,19 +2,17 @@
 
 from config import *
 
-from flask import Flask, jsonify, redirect, request, render_template, url_for
+from flask import Flask, jsonify, redirect, request, url_for
 from flask_caching import Cache
 from flask_cors import CORS
-from flask_login import LoginManager
 from flask_session import Session
-from flask_sqlalchemy import SQLAlchemy
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from app.models import *
 
-from app.utils.aws_tools import  connect_s3#, connect_lambda,
 from app.utils.activity_logger import register_activity_hooks
 
+import boto3
 from app.extensions import db, oauth, login_manager, set_google, set_google_flow, set_s3, set_s3_bucket, set_s3_metadata, set_email_list, set_redis
 from google_auth_oauthlib.flow import InstalledAppFlow
 
@@ -69,10 +67,11 @@ def create_app(test_config=None):
     set_google_flow(flow)
 
     ## S3 connection
-    s3_client = connect_s3(
-        key=app.config['AWS_ACCESS_KEY_ID'],
-        secret=app.config['AWS_SECRET_ACCESS_KEY'],
-        region=app.config['AWS_REGION']
+    s3_client = boto3.client(
+        "s3", 
+        aws_access_key_id=app.config['AWS_ACCESS_KEY_ID'], 
+        aws_secret_access_key=app.config['AWS_SECRET_ACCESS_KEY'], 
+        region_name=app.config['AWS_REGION']
     )
     set_s3(s3_client)
 
