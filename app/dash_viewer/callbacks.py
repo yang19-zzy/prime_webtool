@@ -4,9 +4,8 @@ from dash.exceptions import PreventUpdate
 from dash import html, dash_table
 
 # import redis
-from app.utils.storage_tool import get_redis
+from app.extensions import get_redis
 import json
-import pandas as pd
 
 
 def register_callbacks(app):
@@ -16,13 +15,12 @@ def register_callbacks(app):
             raise PreventUpdate
 
         key = pathname.replace("/dash_viewer/", "")
-        print('this is pathname', pathname)
-        print(key)
+        # print('this is pathname', pathname)
+        # print(key)
         if not key:
             raise PreventUpdate
 
         r = get_redis()
-        # value = r.get(f"merged_data:{key}")
         value = r.get(key)
         if not value:
             return html.Div("Data not found... why!!!??????")
@@ -32,14 +30,13 @@ def register_callbacks(app):
                 data = json.loads(value.decode("utf-8"))
             else:
                 data = json.loads(value)
-            df = pd.DataFrame(data)
         except (json.JSONDecodeError, ValueError) as e:
             return html.Div(f"Error loading data: {str(e)}")
 
         return dash_table.DataTable(
             id="merged-table",
-            columns=[{"name": i, "id": i} for i in df.columns],
-            data=df.to_dict("records"),
+            columns=[{"name": i, "id": i} for i in data[0].keys()],
+            data=data,
             page_size=10,
             style_table={"overflowX": "auto"},
             style_cell={"textAlign": "left", "padding": "5px"},
