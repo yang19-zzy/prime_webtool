@@ -64,6 +64,13 @@ def tracker_options():
     return jsonify({"tracker_select_options": options}), 200
 
 
+@api_bp.route("/data/get/unvalidated_forms", methods=["GET"])
+@login_required
+def unvalidated_forms():
+    forms = get_unvalidated_forms(current_user.user_id)
+    return jsonify({"unvalidated_forms": forms}), 200
+
+
 @api_bp.route("/data/action/merge", methods=["POST"])
 @login_required
 def merge_data():
@@ -120,3 +127,17 @@ def submit_tracker_form():
     db.session.commit()
 
     return jsonify({"message": "Tracker form submitted successfully"}), 200
+
+
+@api_bp.route("/data/action/confirm_tracker_form", methods=["POST"])
+@login_required
+def confirm_tracker_form():
+    data = request.json
+    form_id = data.get("form_id")
+    form = TrackerForm.query.get(form_id)
+    if not form:
+        return jsonify({"error": "Form not found"}), 404
+    form.validated = True
+    form.form_validator = current_user.user_id
+    db.session.commit()
+    return jsonify({"message": "Form validated successfully"}), 200
