@@ -32,7 +32,7 @@
         <a href="{{ url_for('validator.validate') }}"><div class="menu__link">⚠️ Test Validator</div></a>
         {% if session.user_info %}
         <a href="{{ url_for('profile.load_profile') }}"><div class="menu__link">👤 Profile</div></a>
-        <a href="{{ url_for('auth.auth_logout') }}"><button type="button" class="btn logout-btn menu__link" id="logout-btn" onclick="logoutAndStay()">Log out</button></a>
+        <a href="{{ url_for('auth.auth_logout') }}"><button type="button" class="btn logout-btn menu__link" id="logout-btn">Log out</button></a>
         {% endif %}
     </nav>
 

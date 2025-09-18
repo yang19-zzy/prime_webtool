@@ -1,7 +1,6 @@
 # app/blueprints/api/routes.py
 from . import api_bp
 from flask import (
-    json,
     request,
     session as flask_session,
     jsonify
@@ -12,8 +11,27 @@ from app.models import UserRole, MergeHistory
 from app.utils.data_retriever import *
 from app.utils.merge_q_generator import merge_q_generator
 from app.utils.emailer import send_email
-import json as py_json
 from sqlalchemy import text
+
+import base64
+from datetime import date, datetime
+from decimal import Decimal
+import json
+import uuid
+
+
+def _json_serializer(obj):
+    """Serialize non-JSON-native types coming from the DB into JSON-friendly values."""
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    if isinstance(obj, Decimal):
+        # choose float or str depending on precision needs
+        return float(obj)
+    if isinstance(obj, uuid.UUID):
+        return str(obj)
+    if isinstance(obj, bytes):
+        return base64.b64encode(obj).decode("ascii")
+    raise TypeError(f"Type {type(obj)} not serializable")
 
 
 # User Management - user profile view, update/edit
@@ -77,15 +95,24 @@ def merge_data():
     data = request.json
     # Logic to merge data
     merged_key, sql_query = merge_q_generator(data)
-    # return jsonify(sql_query), 200
     redis_key = f"merged_data:{merged_key}"
     redis_client = get_redis()
-    if not redis_client.exists(redis_key): #if not in cache, query and store
+
+    if not redis_client.exists(redis_key):  # if not in cache, query and store
         result = db.session.execute(text(sql_query))
         merged_data = [dict(row._mapping) for row in result.fetchall()]
-        redis_client.setex(redis_key, 3600, py_json.dumps(merged_data))
+
+        # Serialize with custom handler to convert datetimes, Decimals, UUIDs, etc.
+        serialized = json.dumps(merged_data, default=_json_serializer, sort_keys=False)
+        # Store the serialized JSON string in Redis with TTL (setex expects bytes/str)
+        redis_client.setex(redis_key, 3600, serialized)
     else:
-        merged_data = py_json.loads(redis_client.get(redis_key))
+        raw = redis_client.get(redis_key)
+        # redis returns bytes, decode before json.loads
+        if raw is None:
+            merged_data = []
+        else:
+            merged_data = json.loads(raw.decode("utf-8"))
 
     history = MergeHistory(
         user_id=current_user.user_id,
@@ -94,7 +121,7 @@ def merge_data():
     )
     db.session.add(history)
     db.session.commit()
-    return jsonify({"message": "Merge successful", "redis_key": redis_key}), 200
+    return jsonify({"message": "Merge successful", "redis_key": redis_key, 'query': sql_query}), 200
 
 # @api_bp.route("/data/action/download/<key>", methods=["GET"])
 # @login_required

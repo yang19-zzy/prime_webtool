@@ -4,7 +4,7 @@
 
 {% block scripts %}
 <script type="text/javascript" src="{{ url_for('static', filename='js/parseFormData.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/test_tracker.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/testTracker.js') }}"></script>
 {% endblock %}
 
 
@@ -21,13 +21,9 @@
         <h2>Test Tracker</h2>
         
         
-        <form action="{{ url_for('tracker.submit_data') }}" method="POST">
+        <form action="" method="POST">
             <div class="form_owner"><label for="form_owner">Form owner: </label><div id="form_owner">{{ session['user_info']['user_id'] }}</div></div>
             <div id="form-metadata" class="form-element">
-                <!-- <div>
-                    <label for="form_owner">Who is filling this form:</label>
-                    <input type="text" id="form_owner" name="form_owner" value="{{ session['user_info']['user_id'] }}" readonly>
-                </div> -->
                 <div>
                     <label for="subject_id">Subject ID:</label>
                     <input type="text" id="subject_id" name="subject_id">
@@ -36,10 +32,6 @@
                     <label for="test_date">Test Date:</label>
                     <input type="date" id="test_date" name="test_date">
                 </div>
-                <!-- <div>
-                    <label for="test_id">Test ID:</label>
-                    <input type="text" id="test_id" name="test_id">
-                </div> -->
                 <div>
                     <label for="test_type">Test Type:</label>
                     <select id="test_type" name="test_type" multiple class="multi-select">
@@ -61,10 +53,10 @@
                 </div>
             </div>
 
-            <button type="button" class="btn add-btn" onclick="addRow(getDeviceOptions())">
+            <button type="button" class="btn add-btn">
                 <i class="fa fa-plus"></i> Add another device
             </button>
-            <button type="submit" class="btn submit-btn">Submit</button>
+            <button type="submit" class="btn submit-btn" id="tracker-submit-btn">Submit</button>
         </form>
     </div>
     {% endif %}
