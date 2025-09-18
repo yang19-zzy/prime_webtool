@@ -31,7 +31,7 @@ class ViewerOptions(db.Model):
 
 
 class MergeHistory(db.Model):
-    __tablename__ = "merge_history"
+    __tablename__ = "viewer_merge_history"
     __table_args__ = {"schema": "backend"}
 
     id = db.Column(db.Integer, primary_key=True)
@@ -42,7 +42,7 @@ class MergeHistory(db.Model):
 
 
 class TrackerForm(db.Model):
-    __tablename__ = "tracker_form"
+    __tablename__ = "form_validate_history"
     __table_args__ = {"schema": "backend"}
 
     id = db.Column(db.Integer, primary_key=True)
