@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Downtime Notice{% endblock %}
+
+{% block content %}
+<h2>Database Service Window</h2>
+<p>
+    The database is scheduled to be unavailable outside operating hours.
+    <br><br>
+    Access is available between <strong>9:00 AM</strong> and <strong>6:00 PM EDT</strong>.
+</p>
+<a href="{{ url_for('main.index') }}">Return to Home Page</a>
+{% endblock %}

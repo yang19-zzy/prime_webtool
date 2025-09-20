@@ -99,10 +99,16 @@ function createRemoveButton(rowId, rowCount, title) {
 }
 
 
-function populateOptions(selectElement, dataOption) {
-    for (const e in dataOption) {
-        selectElement.options[selectElement.options.length] = new Option(e, e);
+function populateOptions(selectElement, options) {
+    if (!options || Object.keys(options).length === 0) {
+      return;
     }
+    // console.log("Populating options:", options);
+    Object.entries(options).forEach(([key, value]) => {
+        // console.log(`Adding option: ${key} with value: ${value}`);
+      const option = new Option(key, key);
+      selectElement.add(option);
+    });
 }
 
 
@@ -117,4 +123,8 @@ function getSessionData(key) {
 async function isLoggedIn() {
     const response = await fetch('/auth/session-check', { method: 'GET', credentials: 'include' });
     return response.ok;
+}
+
+function clearCorruptedCache(cookieName) {
+  document.cookie = `${cookieName}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
 }

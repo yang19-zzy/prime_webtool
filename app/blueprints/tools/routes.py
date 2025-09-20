@@ -1,34 +1,22 @@
 # app/blueprints/tools/routes.py
-import uuid
-from werkzeug.utils import secure_filename
+from . import tools_bp
 from flask import (
-    current_app,
-    flash,
     render_template,
     request,
-    session as flask_session,
     jsonify,
-    url_for,
-    redirect,
-    send_file,
+    url_for
 )
-
-from . import tools_bp
-import base64
-import json
-import io
-import os
-import requests
 from app.extensions import (
     db,
     get_s3,
     get_s3_bucket,
     get_s3_metadata
 )
-from app.models import PDFJob, UserActivity
-# from app.extensions import get_lambda_client
+from app.models import *
 from botocore.exceptions import ClientError
-import datetime
+import uuid
+from werkzeug.utils import secure_filename
+
 
 
 @tools_bp.route("/")

@@ -75,6 +75,6 @@ def merge_q_generator(data):
         )
         join_clauses += join_clause
 
-    final_query = f"""SELECT {', '.join(select_clauses)} FROM {base_table} {base_alias}{join_clauses}"""
+    final_query = f"""SELECT {', '.join(select_clauses)} FROM {base_table} {base_alias}{join_clauses};"""
     final_key = hashlib.md5(str(key_raw).encode()).hexdigest()
     return final_key, final_query

@@ -1,25 +1,37 @@
 # app/blueprints/api/routes.py
 from . import api_bp
 from flask import (
-    app,
-    json,
     request,
-    redirect,
-    url_for,
     session as flask_session,
-    make_response,
-    jsonify,
-    render_template,
-    current_app,
+    jsonify
 )
 from flask_login import current_user, login_required
-from app.utils.merge_q_generator import merge_q_generator
-from app.utils.data_retriever import *
-from app.extensions import db, get_redis
+from app.extensions import db, get_redis, get_email_list
 from app.models import UserRole, MergeHistory
-import json as py_json
-import hashlib
+from app.utils.data_retriever import *
+from app.utils.merge_q_generator import merge_q_generator
+from app.utils.emailer import send_email
 from sqlalchemy import text
+
+import base64
+from datetime import date, datetime
+from decimal import Decimal
+import json
+import uuid
+
+
+def _json_serializer(obj):
+    """Serialize non-JSON-native types coming from the DB into JSON-friendly values."""
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    if isinstance(obj, Decimal):
+        # choose float or str depending on precision needs
+        return float(obj)
+    if isinstance(obj, uuid.UUID):
+        return str(obj)
+    if isinstance(obj, bytes):
+        return base64.b64encode(obj).decode("ascii")
+    raise TypeError(f"Type {type(obj)} not serializable")
 
 
 # User Management - user profile view, update/edit
@@ -62,11 +74,20 @@ def table_options():
     options = get_table_options(current_user.user_id)
     return jsonify({"table_select_options": options}), 200
 
+
 @api_bp.route("/data/get/tracker_options", methods=["GET"])
 @login_required
 def tracker_options():
     options = get_tracker_options(current_user.user_id)
     return jsonify({"tracker_select_options": options}), 200
+
+
+@api_bp.route("/data/get/unvalidated_forms", methods=["GET"])
+@login_required
+def unvalidated_forms():
+    forms = get_unvalidated_forms(current_user.user_id)
+    return jsonify({"unvalidated_forms": forms}), 200
+
 
 @api_bp.route("/data/action/merge", methods=["POST"])
 @login_required
@@ -74,15 +95,24 @@ def merge_data():
     data = request.json
     # Logic to merge data
     merged_key, sql_query = merge_q_generator(data)
-    # return jsonify(sql_query), 200
     redis_key = f"merged_data:{merged_key}"
     redis_client = get_redis()
-    if not redis_client.exists(redis_key): #if not in cache, query and store
+
+    if not redis_client.exists(redis_key):  # if not in cache, query and store
         result = db.session.execute(text(sql_query))
         merged_data = [dict(row._mapping) for row in result.fetchall()]
-        redis_client.setex(redis_key, 3600, py_json.dumps(merged_data))
+
+        # Serialize with custom handler to convert datetimes, Decimals, UUIDs, etc.
+        serialized = json.dumps(merged_data, default=_json_serializer, sort_keys=False)
+        # Store the serialized JSON string in Redis with TTL (setex expects bytes/str)
+        redis_client.setex(redis_key, 3600, serialized)
     else:
-        merged_data = py_json.loads(redis_client.get(redis_key))
+        raw = redis_client.get(redis_key)
+        # redis returns bytes, decode before json.loads
+        if raw is None:
+            merged_data = []
+        else:
+            merged_data = json.loads(raw.decode("utf-8"))
 
     history = MergeHistory(
         user_id=current_user.user_id,
@@ -91,13 +121,50 @@ def merge_data():
     )
     db.session.add(history)
     db.session.commit()
-    return jsonify({"message": "Merge successful", "redis_key": redis_key}), 200
+    return jsonify({"message": "Merge successful", "redis_key": redis_key, 'query': sql_query}), 200
 
-@api_bp.route("/data/action/download/<key>", methods=["GET"])
+# @api_bp.route("/data/action/download/<key>", methods=["GET"])
+# @login_required
+# def download_merged_data(key):
+#     redis_client = get_redis()
+#     merged_data = redis_client.get(key)
+#     if not merged_data:
+#         return jsonify({"error": "No merged data found"}), 404
+#     return jsonify({"data": py_json.loads(merged_data)}), 200
+
+@api_bp.route("/data/action/submit_tracker_form", methods=["POST"])
 @login_required
-def download_merged_data(key):
-    redis_client = get_redis()
-    merged_data = redis_client.get(key)
-    if not merged_data:
-        return jsonify({"error": "No merged data found"}), 404
-    return jsonify({"data": py_json.loads(merged_data)}), 200
+def submit_tracker_form():
+    form_data = request.json
+    metadata = form_data.get("metadata", {})
+    # devices = form_data.get("devices", [])
+    # form_owner = metadata.get("form_owner") or current_user.user_id
+    subject_id = metadata.get("subject_id")
+
+    send_email(
+        recipient=get_email_list(),
+        subject="⚠️ New Form Submitted [PRIME Lab In-lab Tracker]",
+        message_text=f"PRIME Lab In-lab Tracker\n\tSubject ID: {subject_id}\n\tSubmitter: {current_user.user_id} {'' if not current_user.first_name else f'({current_user.first_name})'}",
+        credentials=flask_session["google_credentials"],
+    )
+    new_form = TrackerForm(
+        form_owner=current_user.user_id, subject_id=subject_id, form_data=form_data, timestamp=db.func.now()
+    )
+    db.session.add(new_form)
+    db.session.commit()
+
+    return jsonify({"message": "Tracker form submitted successfully"}), 200
+
+
+@api_bp.route("/data/action/confirm_tracker_form", methods=["POST"])
+@login_required
+def confirm_tracker_form():
+    data = request.json
+    form_id = data.get("form_id")
+    form = TrackerForm.query.get(form_id)
+    if not form:
+        return jsonify({"error": "Form not found"}), 404
+    form.validated = True
+    form.form_validator = current_user.user_id
+    db.session.commit()
+    return jsonify({"message": "Form validated successfully"}), 200

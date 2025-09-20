@@ -1,8 +1,5 @@
 # app/dash_app/layout.py
-from dash import html, dcc, dash_table
-import pandas as pd
-import json
-import redis
+from dash import html, dcc
 
 
 def create_layout():
