@@ -37,26 +37,89 @@ class DataViewer {
     }
   }
   
-  async getTableDataOptions() {
+  async getTableDataOptions(forceRefresh = false) {
     try {
+      const cacheKey = "table_select_options";
+      const timestampKey = "table_select_options_timestamp";
+      
+      if (!forceRefresh) {
+        // Check if BOTH sessionStorage entries exist
+        const cachedData = sessionStorage.getItem(cacheKey);
+        const cacheTimestamp = sessionStorage.getItem(timestampKey);
+        
+        if (cachedData && cacheTimestamp) {
+          const cacheAge = Date.now() - parseInt(cacheTimestamp);
+          const maxAge = 3600000; // 1 hour in milliseconds
+          
+          // If cache is still valid
+          if (cacheAge < maxAge) {
+            try {
+              const parsed = JSON.parse(cachedData);
+              if (this.validateTableOptions(parsed)) {
+                console.log("Using cached table options from sessionStorage");
+                return parsed;
+              }
+            } catch (e) {
+              console.warn("Corrupted sessionStorage cache, clearing", e);
+              sessionStorage.removeItem(cacheKey);
+              sessionStorage.removeItem(timestampKey);
+            }
+          } else {
+            console.log("sessionStorage cache expired, clearing");
+            sessionStorage.removeItem(cacheKey);
+            sessionStorage.removeItem(timestampKey);
+          }
+        }
+      }
+
+      // Fetch from API
+      console.log("Fetching table options from API");
       const resp = await fetch(`/api/data/get/table_options`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
       });
-      
+
       if (!resp.ok) {
         throw new Error(`Failed to fetch table options: ${resp.statusText}`);
       }
-      
+
       const result = await resp.json();
+      
+      if (!this.validateTableOptions(result.table_select_options)) {
+        throw new Error("Invalid data structure received from API");
+      }
+
+      // Store in sessionStorage (much larger capacity than cookies)
+      sessionStorage.setItem(cacheKey, JSON.stringify(result.table_select_options));
+      sessionStorage.setItem(timestampKey, Date.now().toString());
+      
+      console.log("Table options cached in sessionStorage");
       return result.table_select_options;
+      
     } catch (error) {
       console.error("Error fetching table options:", error);
+      // Fallback: try to return any existing cache (even if stale)
+      const cachedData = sessionStorage.getItem(cacheKey);
+      if (cachedData) {
+        try {
+          console.warn("Returning stale cache from sessionStorage due to API error");
+          return JSON.parse(cachedData);
+        } catch (e) {
+          console.warn("Stale cache also corrupted, returning null");
+        }
+      }
       return null;
     }
   }
-  
+
+  // Helper method for validation
+  validateTableOptions(data) {
+    // Customize based on your expected data structure
+    return data && (Array.isArray(data) || typeof data === 'object');
+  }
+
+
   async initializeDataViewer() {
     this.tableDataOptions = await this.getTableDataOptions();
     
@@ -83,7 +146,7 @@ class DataViewer {
       "project-row-element"
     );
     
-    this.populateOptions(projectSelect.querySelector("select"), this.tableDataOptions);
+    populateOptions(projectSelect.querySelector("select"), this.tableDataOptions);
     
     // Add change event listener
     const selectElement = projectSelect.querySelector("select");
@@ -162,7 +225,7 @@ class DataViewer {
     // Initial population of data source options if project is selected
     if (this.selectedProject) {
       const dataOptions = this.tableDataOptions[this.selectedProject] || {};
-      this.populateOptions(dataSourceSelect, dataOptions);
+      populateOptions(dataSourceSelect, dataOptions);
     }
     
     // Set event handlers
@@ -176,10 +239,12 @@ class DataViewer {
     // Reset and repopulate table selection
     tableSourceSelect.length = 1;
     tableSourceSelect.options[0] = new Option("Choose an option", "");
+    tableSourceSelect.options[0].disabled = true;
+    tableSourceSelect.options[0].className = "placeholder";
     
     if (this.selectedProject && selectedDataSource) {
       const tableOptions = (this.tableDataOptions[this.selectedProject] || {})[selectedDataSource] || {};
-      this.populateOptions(tableSourceSelect, tableOptions);
+      populateOptions(tableSourceSelect, tableOptions);
     }
   }
   
@@ -206,7 +271,7 @@ class DataViewer {
   handleModalConfirm(rowId, selectedColumns) {
     const colFilterSelect = document.querySelector(`#${rowId} .col_filter`);
     colFilterSelect.length = 0; // Clear existing options
-    this.populateOptions(colFilterSelect, selectedColumns);
+    populateOptions(colFilterSelect, selectedColumns);
   }
   
   createRowDiv(id, className) {
@@ -215,18 +280,7 @@ class DataViewer {
     div.classList.add(className);
     return div;
   }
-  
-  populateOptions(selectElement, options) {
-    if (!options || Object.keys(options).length === 0) {
-      return;
-    }
-    
-    Object.entries(options).forEach(([key, value]) => {
-      const option = new Option(key, key);
-      selectElement.add(option);
-    });
-  }
-  
+
   createRemoveButton(rowId) {
     const button = document.createElement("button");
     button.type = "button";
@@ -343,12 +397,12 @@ class DataViewer {
   
   displayMergedTable() {
     const tables = document.querySelectorAll(".table-selection-row");
-    const tableSelections = {"schema": this.selectedProject, "tables": {}};
-    
     if (!this.selectedProject) {
       alert("Please select a project first.");
       return;
     }
+    
+    const tableSelections = {"schema": this.selectedProject, "tables": {}};
     
     tables.forEach(row => {
       const rowId = row.id;
@@ -356,53 +410,59 @@ class DataViewer {
       const tableSelect = row.querySelector('[name="table[]"]');
       const colListSelect = row.querySelector('[name="col_lst[]"]');
       
-      if (!dataSourceSelect?.value || !tableSelect?.value) {
-        return;
-      }
+      // if (!dataSourceSelect?.value || !tableSelect?.value) {
+      //   alert("Please make sure all table selections are complete.");
+      //   return;
+      // }
       
       const selectedCols = Array.from(colListSelect?.options || [])
         .map(option => option.value)
         .filter(Boolean);
         
-      if (!selectedCols.length) {
-        return;
-      }
+      // if (!selectedCols.length) {
+      //   // this should not happen as some cols are always selected
+      //   alert("Please select at least one column to view.");
+      //   return;
+      // }
 
       tableSelections["tables"][rowId] = {
-        "metrics": dataSourceSelect.value,
-        "table": tableSelect.value,
+        "metrics": (dataSourceSelect.value || "").trim(),
+        "table": (tableSelect.value || "").trim(),
         "cols": selectedCols,
       };
     });
-    
-    if (Object.keys(tableSelections).length === 0) {
+
+    if (Object.keys(tableSelections.tables).length === 0 || tableSelections[0] === 'Choose an option') {
       alert("Please select at least one table to view.");
       return;
+    } else {
+      // check if selected tables are duplicated
+      const tableKeys = Object.values(tableSelections["tables"]).map(sel => `${sel.metrics}-${sel.table}`);
+      const uniqueTableKeys = new Set(tableKeys);
+      if (uniqueTableKeys.size !== tableKeys.length) {
+        alert("Please make sure selected tables are not duplicated.");
+        return;
+      }
+      
+      // Send merge request
+      fetch('/api/data/action/merge', {
+        method: "POST",
+        headers: {
+          'Content-Type': "application/json",
+        },
+        body: JSON.stringify(tableSelections)
+      })
+      .then(resp =>  resp.json())
+      .then(result => {
+        // console.log("Merge result:", result);
+        // console.log("Loading Dash frame with key:", result.redis_key);
+        this.loadDashFrame(result.redis_key);
+      })
+      .catch(error => console.error("Error during merge/download:", error));
+
     }
     
-    // check if selected tables are duplicated
-    const tableKeys = Object.values(tableSelections["tables"]).map(sel => `${sel.metrics}-${sel.table}`);
-    const uniqueTableKeys = new Set(tableKeys);
-    if (uniqueTableKeys.size !== tableKeys.length) {
-      alert("Please make sure selected tables are not duplicated.");
-      return;
-    }
-    
-    // Send merge request
-    fetch('/api/data/action/merge', {
-      method: "POST",
-      headers: {
-        'Content-Type': "application/json",
-      },
-      body: JSON.stringify(tableSelections)
-    })
-    .then(resp =>  resp.json())
-    .then(result => {
-      // console.log("Merge result:", result);
-      // console.log("Loading Dash frame with key:", result.redis_key);
-      this.loadDashFrame(result.redis_key);
-    })
-    .catch(error => console.error("Error during merge/download:", error));
+
   }
   
   loadDashFrame(key) {
@@ -443,9 +503,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   
-//   // Add event listener to the merge/display button
-//   const displayBtn = document.getElementById('display-merged-table-btn');
-//   if (displayBtn) {
-//     displayBtn.addEventListener('click', () => dataViewer.displayMergedTable());
-//   }
 });

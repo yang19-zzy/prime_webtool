@@ -83,16 +83,28 @@ def get_table_options(user_id):
 
 
 def get_tracker_options(user_id):
-    options = FormOptions.query.order_by(
+    options = FormOptions.query.filter_by(active=True).order_by(
         FormOptions.field_name, FormOptions.item_num
     ).all()
-    grouped = defaultdict(list)
-    device_map = defaultdict(list)
-
+    grouped = defaultdict(lambda: defaultdict(list))
     for opt in options:
-        if opt.field_name == "device":
-            device_map[opt.value].append(opt.item_num)
-        elif opt.value not in grouped[opt.field_name]:
-            grouped[opt.field_name].append(opt.value)
-    grouped["device"] = device_map
+        grouped[opt.field_name][opt.value].append(opt.item_num)
     return grouped
+
+
+def get_unvalidated_forms(user_id):
+    forms = TrackerForm.query.filter_by(validated=False).order_by(TrackerForm.id).all()
+    data = [
+        {
+            "form_id": f.id,
+            "data": {
+                "form_owner": f.form_owner,
+                "subject_id": f.subject_id,
+                "form_data": f.form_data,
+                "form_validator": f.form_validator,
+                "validated": f.validated,
+            },
+        }
+        for f in forms
+    ]
+    return data
