@@ -9,22 +9,19 @@
 
 {% block content %}
 <div>
-    <!-- <h3>Still under development...</h3> -->
-     <div>
-        <h2>Test Validator</h2>
-        {% if not session.user_info %}
-            <p>Please log in first.</p>
-            <a href="{{ url_for('auth.auth_login', next=request.path, provider='google') }}"><button type="button" class="btn login-btn" id="login-btn">Log in</button></a>
-        
-        {% elif session.user_role != 'admin' and session.user_role != 'dev' %}
-            <p>Sorry, you have to be an Admin or Developer to access this page.</p>
+    <h2>Test Validator</h2>
+    {% if not session.user_info %}
+        <p>Please log in first.</p>
+        <a href="{{ url_for('auth.auth_login', next=request.path, provider='google') }}"><button type="button" class="btn login-btn" id="login-btn">Log in</button></a>
+    
+    {% elif session.user_role != 'admin' and session.user_role != 'dev' %}
+        <p>Sorry, you have to be an Admin or Developer to access this page.</p>
 
-        {% else %}
-            <div id="validator-container">
-            <!-- Populate test tracks dynamically -->
-            </div>
-        {% endif %}
-    </div>
+    {% else %}
+        <div id="validator-container">
+        <!-- Populate test tracks dynamically -->
+        </div>
+    {% endif %}
 </div>
 
 {% endblock %}

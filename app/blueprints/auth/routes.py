@@ -36,6 +36,15 @@ def auth_login():
 
 @auth_bp.route("/oauth2callback")
 def auth_callback():
+
+    # Try database connection before proceeding
+    try:
+        db.session.execute(text("SELECT 1"))
+    except Exception as db_exc:
+        current_app.logger.error(f"Database connection failed: {db_exc}")
+        flask_session.clear()
+        return render_template("downtime_notice.html"), 503
+    
     try:
         # Forcefully dispose stale connections (optional extra)
         db.engine.dispose()
