@@ -1,36 +1,41 @@
-# required for lightweight images
-setuptools
-wheel
-dotenv
-
+# Core runtime dependencies (minimal for this app)
+python-dotenv
 Flask
-Flask-Cors
 Flask-Login
-Flask-Migrate
 Flask-Session
-Flask-SQLAlchemy
-Flask-WTF
-gunicorn
-
-SQLAlchemy
-psycopg2-binary
-
+Flask-Cors
+Flask-Caching
 redis
 requests
-Authlib
-boto3
-s3fs
-pandas
-pyarrow
+authlib
 
+# Database / ORM and driver (you said you use SQLAlchemy, not Flask-SQLAlchemy)
+Flask-SQLAlchemy
+psycopg2-binary  # keep if the app connects to Postgres
+
+# AWS SDK (presign URLs / upload) - boto3 is primary; botocore used directly in code
+boto3
+botocore
+
+# Dash feature
 dash
 plotly
 
-openpyxl  # <-- for Excel export
-
-# optional: Google APIs
-google-api-core
-google-api-python-client
+# Google login (used for login)
 google-auth
-google-auth-httplib2
 google-auth-oauthlib
+google-api-python-client
+
+# Werkzeug (for secure_filename)
+werkzeug
+
+# Optional data / Excel support (only if those features are used)
+# pandas
+# pyarrow  #used for parquet files
+openpyxl
+
+# Optional: S3 filesystem for pandas read/write (only if used)
+# s3fs
+
+# Deployment (optional)
+gunicorn  #prod

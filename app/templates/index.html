@@ -11,6 +11,7 @@
                 <li>Browse and query internal research datasets</li>
                 <li>Extract and format data</li>
                 <li>Review submitted forms (admin access only)</li>
+                <li>Manage user access (admin access only)</li>
             </ul>
             Everything is secured through U-M login, and the app is built to grow as our needs evolve.
         </p>
@@ -28,12 +29,8 @@
     <br>
     <div class="login">
         {% if not session.user_info %}
-
-            <!-- <a href="{{ url_for('auth.auth_login', provider='google') }}"><img src="{{ url_for('static', filename='img/web_neutral_sq_SI@4x.png') }}" /></a> -->
+            <!-- <a href="{{ url_for('auth.auth_login', provider='google') }}"><img src="{{ url_for('static', filename='img/web_neutral_sq_SI@4x.png') }}" style="width: 200px;"/></a> -->
             <a href="{{ url_for('auth.auth_login') }}"><button type="button" class="btn login-btn" id="login-btn">Log in with umich account</button></a>
-        
-        {% else %}
-            <a href="{{ url_for('auth.auth_logout') }}"><button type="button" class="btn logout-btn" id="logout-btn">Log out</button></a>
         {% endif %}
     </div>
 

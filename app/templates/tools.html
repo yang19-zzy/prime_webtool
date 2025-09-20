@@ -6,11 +6,6 @@
 <script type = "text/javascript" src = "{{ url_for('static', filename = 'js/toolsUI.js') }}" ></script>
 {% endblock %}
 
-{% block logout_btn %}
-{% if session.user_info %}
-<a href="{{ url_for('auth.auth_logout') }}"><button type="button" class="btn logout-btn menu__link" id="logout-btn" onclick="logoutAndStay()">Log out</button></a>
-{% endif %}
-{% endblock %}
 
 {% block content %}
 <div>

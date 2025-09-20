@@ -3,19 +3,19 @@ This document provide a list of infrastructure maintenance routines and describe
 
 - Contents covered:
 
-    1. [Backups](#backups)
+    1. [Backups](#1-backups)
     2. [Monitoring & Alerts]
-    3. [Patching & Updates]
+    3. [Patching & Updates](#patching--updates)
     4. [Database Maintenance]
-    5. [Security Maintenance](#)
+    5. [Security Maintenance]
     6. [Resource Scaling & Cost Management](#)
     7. [Certificate & Domain Renewal](#certificate--domain-renewal)
-    8. [Housekeeping Tasks](#)
+    8. [Housekeeping Tasks](#8-housekeeping-tasks)
     9. [Audit & Compliance](#)
     10. [Incident Response & Reporting](#)
 
 
-## Backups
+## 1. Backups
 
 ### Current Status
 No automated backup processes are currently in place for this repository’s resources.  
@@ -64,6 +64,20 @@ To restore:
 - Document any automated backup solutions here when implemented.
 
 
+## Resource Scaling & Cost Management
+### Automations used on AWS - Schedulers
+
+Schedulers are used to stop and start EC2 instances and RDB instance automatically on a recurring schedule.
+
+- The role asigned to a scheduler has to have permission to assume role and invoke lambda function since we're using lambda function to control instances.
+
+```json
+
+```
+
+This script initializes the automation tool and runs a sample task. Replace `"example_task"` with your specific task name.
+
+
 ## Certificate & Domain Renewal
 ### TLS/SSL Certificate (Let’s Encrypt via Certbot)
 
@@ -108,20 +122,50 @@ The web server uses **Let's Encrypt** to enable HTTPS. Certificate management is
 ### Roles and Policies
 
 
+## 8. Housekeeping Tasks
+ 
+### Checklist to verity TLS, nginx, and proxy headers
+1. SSL is good + HTTP -> HTTPS redirects
+    ```sh
+    # TLS cert info
+    echo | openssl s_client -connect prime.kines.umich.edu:443 -servername prime.kines.umich.edu 2>/dev/null | openssl x509 -noout -subject -issuer -dates
 
-## Automations used on AWS
+    # HTTPS returns 200
+    curl -sS https://prime.kines.umich.edu -o /dev/null -w "%{http_code}\n"
 
-### Schedulers
+    # HTTP redirects to HTTPS and shows Location header
+    curl -sI http://prime.kines.umich.edu | sed -n '1p;/^Location/p'
+    ```
+2. nginx is actually using the prod config + forwarding proto
+    ```sh
+    # Dump the running nginx config from inside the container
+    docker exec -it prime_webtool_nginx_1 nginx -T | sed -n '1,200p'
+    # In the 443 server/location / block you should see:
+    #   proxy_set_header X-Forwarded-Proto $scheme;
+    #   proxy_set_header X-Forwarded-Host $host;
+    #   proxy_set_header X-Forwarded-Port $server_port;
+    #   proxy_http_version 1.1;
+    #   proxy_redirect off;
+    ```
+3. Gunicorn is trusting forwarded headers
+    ```sh
+    # Check the gunicorn command line has --forwarded-allow-ips=*
+    docker exec -it prime_webtool_web_1 ps -ef | grep gunicorn | grep -v grep
 
-Schedulers are used to stop and start EC2 instances and RDB instance automatically on a recurring schedule.
+    # And the env var (belt & suspenders) - optional
+    docker exec -it prime_webtool_web_1 env | grep FORWARDED_ALLOW_IPS
+    ```
+4. Quick OAuth plumbing sanity
+    ```sh
+    # The app should 302 to Google when starting login
+    curl -sI https://prime.kines.umich.edu/auth/login | sed -n '1p;/^Location/p'
+    ```
+5. confirm gunicorn workers
+    ```sh
+    docker exec -it prime_webtool_web_1 ps -ef | grep gunicorn
+    # Should include: -w 3 --threads 4 --timeout 90 --graceful-timeout 30
+    ```
 
-- The role asigned to a scheduler has to have permission to assume role and invoke lambda function since we're using lambda function to control instances.
-
-```json
-
-```
-
-This script initializes the automation tool and runs a sample task. Replace `"example_task"` with your specific task name.
 
 
 ## 

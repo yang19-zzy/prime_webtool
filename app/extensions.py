@@ -1,18 +1,19 @@
 # app/extensions.py
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
 from authlib.integrations.flask_client import OAuth
-from flask_migrate import Migrate
+from redis import Redis
 
 
 db = SQLAlchemy()
-migrate = Migrate()
+login_manager = LoginManager()
 oauth = OAuth()
 _google = None
 _google_flow = None
 _s3 = None
 _s3_bucket = None
 _s3_metadata = None
-_redis_client = None
+_redis_client = Redis()
 _email_list = None
 # _lambda_client = None
 
@@ -79,6 +80,12 @@ def set_redis(client):
     global _redis_client
     _redis_client = client
 
+def get_redis():
+    # redis_client = current_app.extensions.get("redis")
+    if _redis_client is None:
+        raise ValueError("Redis client has not been set.")
+    return _redis_client
+
 def set_email_list(email_list):
     global _email_list
     _email_list = email_list
@@ -87,11 +94,3 @@ def get_email_list():
     if _email_list is None:
         raise ValueError("Email list has not been set.")
     return _email_list
-
-from flask import current_app
-
-def get_redis():
-    redis_client = current_app.extensions.get("redis")
-    if redis_client is None:
-        raise ValueError("Redis client has not been set.")
-    return redis_client

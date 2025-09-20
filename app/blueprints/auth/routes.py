@@ -10,7 +10,8 @@ from flask import (
     render_template,
     current_app,
 )
-from app.extensions import get_google_flow, db, get_email_list
+from flask_login import login_required, login_user, logout_user, current_user
+from app.extensions import get_google_flow, db, get_email_list, login_manager
 from app.models import User, UserRole
 from sqlalchemy import text, inspect
 import requests
@@ -19,7 +20,7 @@ import os
 
 @auth_bp.route("/login")
 def auth_login():
-    next_url = request.args.get("next", request.referrer or url_for("/"))
+    next_url = request.args.get("next", request.referrer or url_for("main.index"))
     flask_session["next_url"] = next_url
     redirect_uri = url_for("auth.auth_callback", _external=True)
 
@@ -35,6 +36,15 @@ def auth_login():
 
 @auth_bp.route("/oauth2callback")
 def auth_callback():
+
+    # Try database connection before proceeding
+    try:
+        db.session.execute(text("SELECT 1"))
+    except Exception as db_exc:
+        current_app.logger.error(f"Database connection failed: {db_exc}")
+        flask_session.clear()
+        return render_template("downtime_notice.html"), 503
+    
     try:
         # Forcefully dispose stale connections (optional extra)
         db.engine.dispose()
@@ -61,27 +71,32 @@ def auth_callback():
         flask_session["user_info"] = user_info
         flask_session["user_id"] = user_info["user_id"]
 
-        # Check if the user is already in the database
-        # If not, create a new user
-        user = User.query.filter_by(user_id=user_info["user_id"]).first()
-        if not user:
-            user = User(
-                email=user_info["email"],
-                user_id=user_info["user_id"],
-                first_name=user_info["given_name"],
-                last_name=user_info["family_name"],
-            )
-            db.session.add(user)
-            db.session.commit()
+        try:
+            # Check if the user is already in the database
+            # If not, create a new user
+            user = User.query.filter_by(user_id=user_info["user_id"]).first()
+            if not user:
+                user = User(
+                    email=user_info["email"],
+                    user_id=user_info["user_id"],
+                    first_name=user_info["given_name"],
+                    last_name=user_info["family_name"],
+                )
+                db.session.add(user)
+                db.session.commit()
 
-        # check user role
-        user_role = UserRole.query.filter_by(user_id=user.user_id).first()
-        if not user_role:
-            user_role = UserRole(user_id=user.user_id, role="app_user")  # Default role
-            db.session.add(user_role)
-            db.session.commit()
-
-        flask_session["user_role"] = user_role.role
+            # check user role
+            user_role = UserRole.query.filter_by(user_id=user.user_id).first()
+            if not user_role:
+                user_role = UserRole(user_id=user.user_id, role="app_user")  # Default role
+                db.session.add(user_role)
+                db.session.commit()
+            login_user(user)
+            flask_session["user_role"] = user_role.role
+        except Exception as e:
+            current_app.logger.error(f"Error occurred while querying user info: {e}")
+            db.session.rollback()
+            flask_session["user_role"] = 'app_user' #default to app_user if db query fails
         print("this is user-info!!!!!!!!!:", user_info)
 
         next_url = flask_session.pop("next_url", request.args.get("state", "/"))
@@ -97,13 +112,18 @@ def auth_callback():
 
 
 @auth_bp.route("/logout")
+@login_required
 def auth_logout():
     # Clear user session and cookies
-    next_url = request.args.get("state") or request.referrer or "/"
+    # Determine where to redirect after logout
+    if "profile" in request.referrer:
+        next_url = url_for("main.index")
+    else:
+        next_url = request.referrer or "/"
     flask_session.clear()
-    response = make_response(redirect(next_url))
-    # response.delete_cookie('logged_in')
-    return response
+    logout_user()
+    # response = make_response(redirect(next_url))
+    return redirect(next_url)
 
 
 @auth_bp.route("/db_test", methods=["GET"])
@@ -127,6 +147,11 @@ def session_check():
                 "user_role": flask_session["user_role"],
                 "email_list": get_email_list() or [],
             }
-        )
+        ), 200
     else:
-        return jsonify({'logged_in': False}), 401
+        return jsonify({"logged_in": False}), 401
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.filter(User.user_id == user_id).first()

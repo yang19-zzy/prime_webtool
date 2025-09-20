@@ -57,7 +57,7 @@ nav a:visited {
 }
 
 .main-container {
-  margin-left: 200px;
+  margin-left: 220px;
   transition: margin-left 0.3s ease;
   padding-left: 5%;
   padding-right: 5%;
@@ -253,31 +253,15 @@ button:hover {
   flex: 1 1 auto;
   min-width: 200px;
   margin: 5px 5px 0;
-  /* border: 1px solid red; */
-  /* margin-right: 5px; */
 }
-
-/* 
-.table-selection-row > .top > button {
-  margin-left: 10px;
-} */
-
 .multi-select, .table-selection {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background-color: #f6f7fa;
-  font-size: 1rem;
-  line-height: 1.2;
   appearance: none;       /* Removes native UI in some browsers */
   overflow-y: scroll;
   overflow-x: scroll;
 }
-
-.multi-select option {
-  padding: 0.5rem;
+.multi-select::-webkit-scrollbar {
+  display: none;
 }
-
 
 /* Modal */
 .modal {
@@ -291,7 +275,6 @@ button:hover {
   /* overflow-y: scroll; */
   background-color: rgba(0,0,0,0.5);
 }
-
 .modal-content {
   background-color: #fefefe;
   margin: auto;
@@ -305,7 +288,6 @@ button:hover {
   display: flex;
   flex-direction: column;        /* Ensure button stays below */
 }
-
 .modal-checkbox-row {
   display: flex;
   flex-direction: row;
@@ -313,15 +295,18 @@ button:hover {
   margin-bottom: 5px;
   padding: 5px;
 }
-
 .modal-checkbox-row input {
   width: 13px;
 }
-
 .modal-checkbox-row:hover {
   background-color: #e0dfdfd7;
   border-radius: 5px;
   transition: 5ms;
+}
+.modal-btn-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
 }
 
 /* Choices for data viewer */
@@ -495,3 +480,118 @@ input[type="file"]::file-selector-button {
     font-size: 1.5em;
     cursor: pointer;
 }
+
+/* Profile Page */
+#profile-container, #profile-manage-container {
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  border: 1px solid #dbdbdb;
+  padding: 12px;
+  gap: 12px;
+  margin: 10px 0 ;
+}
+
+.profile-row {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+}
+
+.profile-row > * {
+  flex: 1 1 0;
+}
+
+.profile-field > * {
+  padding: 5px;
+}
+
+.profile-field > span {
+  border-radius: 5px;
+  background-color: #e5e9fbee;
+}
+
+.user-table {
+  width: 100%;
+}
+.user-table tbody tr {
+  height: 32px;
+}
+.user-table tbody tr:hover {
+  box-shadow: 3px 3px 15px #4947479a;
+  border-radius: 5px;
+  transition: 0.1s;
+}
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+  text-align: center;
+}
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  border-radius: 24px;
+  transition: .3s;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px; width: 18px;
+  left: 3px; bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: .3s;
+  box-shadow: 0 1px 2px #9992;
+}
+input:checked + .slider {
+  background-color: #42b883;
+}
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+.center-cell {
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Login-required page */
+/* .login-required-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+}
+.login-required-container h2 {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    color: #333;
+}
+.login-required-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+.login-required-message p {
+    font-size: 1.2rem;
+    margin: 0;
+    color: #666;
+}
+.login-required-message .btn {
+    padding: 12px 24px;
+    font-size: 1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-block;
+} */

@@ -1,30 +1,30 @@
 # app/__init__.py
 
-from flask import Flask, render_template, session as flask_session
-from flask_session import Session
 from config import *
+
+from flask import Flask, jsonify, redirect, request, url_for
+from flask_caching import Cache
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
+from flask_session import Session
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from app.models import *
 
-from app.utils.aws_tools import  connect_s3#, connect_lambda,
 from app.utils.activity_logger import register_activity_hooks
-# from authlib.integrations.flask_client import OAuth
 
-from app.extensions import db, oauth, set_google, set_google_flow, set_s3, set_s3_bucket, set_s3_metadata, set_email_list, get_email_list
-# from google.oauth2.credentials import Credentials
+import boto3
+from app.extensions import db, oauth, login_manager, set_google, set_google_flow, set_s3, set_s3_bucket, set_s3_metadata, set_email_list, set_redis
 from google_auth_oauthlib.flow import InstalledAppFlow
-# from googleapiclient.discovery import build
 
-from app.blueprints.main import main_bp
+from app.blueprints.api import api_bp
 from app.blueprints.auth import auth_bp
-from app.blueprints.tracker import tracker_bp
-from app.blueprints.viewer import viewer_bp
-from app.blueprints.validator import validator_bp
-from app.blueprints.tools import tools_bp
 from app.blueprints.errors import errors_bp
+from app.blueprints.main import main_bp
+from app.blueprints.profile import profile_bp
+from app.blueprints.tools import tools_bp
+from app.blueprints.tracker import tracker_bp
+from app.blueprints.validator import validator_bp
+from app.blueprints.viewer import viewer_bp
 
 from redis import Redis
 
@@ -67,10 +67,11 @@ def create_app(test_config=None):
     set_google_flow(flow)
 
     ## S3 connection
-    s3_client = connect_s3(
-        key=app.config['AWS_ACCESS_KEY_ID'],
-        secret=app.config['AWS_SECRET_ACCESS_KEY'],
-        region=app.config['AWS_REGION']
+    s3_client = boto3.client(
+        "s3", 
+        aws_access_key_id=app.config['AWS_ACCESS_KEY_ID'], 
+        aws_secret_access_key=app.config['AWS_SECRET_ACCESS_KEY'], 
+        region_name=app.config['AWS_REGION']
     )
     set_s3(s3_client)
 
@@ -117,9 +118,30 @@ def create_app(test_config=None):
     except Exception as e:
         print(f"Redis connection failed: {e}")
     app.extensions["redis"] = redis_client
+    set_redis(redis_client)
 
     # Initialize ProxyFix middleware
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1, x_port=1, x_proto=1)
+
+    # Initialize Flask-Login
+    login_manager.init_app(app)
+    login_manager.login_view = None
+    login_manager.login_message = None
+    login_manager.session_protection = "strong"
+    @login_manager.unauthorized_handler
+    def unauthorized_callback():
+        if request.path.startswith('/api/'):
+            return jsonify({'error': 'Please log in first', 'login_required': True}), 401
+        else:
+            return redirect(url_for('main.index'))
+
+
+
+    # Initialize Flask-Caching
+    cache = Cache(app, config={
+        "CACHE_TYPE": "RedisCache", 
+        "CACHE_REDIS_CLIENT": redis_client
+    })
 
     # Register Blueprints
     app.register_blueprint(main_bp)
@@ -129,6 +151,8 @@ def create_app(test_config=None):
     app.register_blueprint(validator_bp)
     app.register_blueprint(tools_bp)
     app.register_blueprint(errors_bp)
+    app.register_blueprint(profile_bp)
+    app.register_blueprint(api_bp, url_prefix="/api")
 
     # force end db session
     # @app.teardown_appcontext
@@ -140,7 +164,6 @@ def create_app(test_config=None):
 
     # Register session interface
     Session(app)
-    # app.session_interface.regenerate(flask_session)
 
     print(app.url_map)
     # print("=== FINAL SQLAlchemy DB URI ===")
