@@ -1,8 +1,7 @@
 # app/blueprints/validator/routes.py
 from . import validator_bp
-from app.extensions import db, get_redis
-from app.models import TrackerForm
-from flask import render_template, request, session as flask_session, jsonify, url_for
+
+from flask import render_template, request, url_for
 from flask_login import current_user
 
 @validator_bp.route("/")

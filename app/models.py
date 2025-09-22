@@ -57,22 +57,6 @@ class TrackerForm(db.Model):
         return f"<TrackerForm {self.id}>"
 
 
-class UserRole(db.Model):
-    __tablename__ = "user_role"
-    __table_args__ = (
-        UniqueConstraint("user_id", "role", name="user_role_pkey"),
-        {"schema": "backend"},
-    )
-
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.String(100), nullable=False)
-    role = db.Column(db.String(50), nullable=False)
-    in_lab_user = db.Column(db.Boolean, default=False)  #used for toggle button
-
-    def __repr__(self):
-        return f"<UserRole {self.user_id} - {self.role}>"
-
-
 class User(db.Model, UserMixin):
     __tablename__ = "user"
     __table_args__ = {"schema": "backend"}
@@ -83,12 +67,14 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(100), nullable=False)
     first_name = db.Column(db.String(100), nullable=True)
     last_name = db.Column(db.String(100), nullable=True)
+    role = db.Column(db.String(50), nullable=False)
+    in_lab_user = db.Column(db.Boolean, default=False)  #used for toggle button
 
     def get_id(self):
         return str(self.user_id)
 
     def __repr__(self):
-        return f"<User {self.email}>"
+        return f"<User {self.user_id}-{self.role}-{self.in_lab_user}"
 
 
 class PDFJob(db.Model):

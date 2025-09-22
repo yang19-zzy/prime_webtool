@@ -10,17 +10,18 @@
 {% block content %}
 <div>
     <h2>Test Validator</h2>
-    {% if not session.user_info %}
+    {% if not current_user.is_authenticated %}
         <p>Please log in first.</p>
         <a href="{{ url_for('auth.auth_login', next=request.path, provider='google') }}"><button type="button" class="btn login-btn" id="login-btn">Log in</button></a>
     
-    {% elif session.user_role != 'admin' and session.user_role != 'dev' %}
-        <p>Sorry, you have to be an Admin or Developer to access this page.</p>
-
-    {% else %}
+    {% elif current_user.role in ['admin', 'dev'] %}
         <div id="validator-container">
         <!-- Populate test tracks dynamically -->
         </div>
+    
+    {% else %}
+        <p>Sorry, you have to be an Admin or Developer to access this page.</p>
+
     {% endif %}
 </div>
 
