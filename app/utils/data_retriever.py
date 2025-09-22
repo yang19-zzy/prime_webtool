@@ -41,7 +41,7 @@ def get_all_users():
     '''
     Get all users' roles for admin to manage
     '''
-    users = User.query.add_columns(User.row_id, User.user_id, User.first_name, User.last_name, User.email, User.role, User.in_lab_user).order_by(User.row_id).all()
+    users = User.query.add_columns(User.row_id, User.user_id, User.first_name, User.last_name, User.email, User.role, User.in_lab_user).order_by(User.last_name, User.first_name).all()
     # Convert to objects with attributes for compatibility with the return statement
     class UserObj:
         def __init__(self, user_id, first_name, last_name, email, role, in_lab_user):
