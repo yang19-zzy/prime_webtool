@@ -123,7 +123,22 @@ Error when start a ssm-session.
 
 ---
 
-## Issue 8: 
+## Issue 8: 504 Gateway Time-out error
+
+**Description:**
+Getting 504 gateay time-out error after pushing the new release on prod. (Usually it should be the database connection error.)
+
+**Solution:**
+1. take the callback uri from logs and `curl` it within prod server to check if the issue is from the callback authentication
+2. if provides response, the backend app is working fine
+3. test through localhost with a ssm-session opened up to see if database is alive
+4. make sure the wanted RDS instance / cluster is connected to the web server
+5. make sure the web server and RDS server are in the same VPC
+6. ask GPT
+
+---
+
+## Issue 9: 
 
 > Add more issues as needed, following this format.
 
