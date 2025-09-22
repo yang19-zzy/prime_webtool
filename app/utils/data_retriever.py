@@ -8,7 +8,7 @@ def get_schemas_for_user(user_id):
     Get schemas for a specific user
     '''
     # Logic to retrieve schemas for a specific user
-    user = UserRole.query.filter_by(user_id=user_id).first()
+    user = User.query.filter_by(user_id=user_id).first()
     if not user:
         return []
     is_in_lab = user.in_lab_user or user.role == 'admin' or user.role == 'dev'
@@ -27,42 +27,39 @@ def get_profile_for_user(user_id):
     Get a user profile
     '''
     user = User.query.filter_by(user_id=user_id).first()
-    user_role = UserRole.query.filter_by(user_id=user_id).first()
-    if user and user_role:
-        user.role = user_role.role
-    else:
-        user.role = None
-    return {
-        "user_id": user.user_id,
-        "email": user.email,
-        "firstname": user.first_name,
-        "lastname": user.last_name,
-        "role": user.role
-    }
+    if user:
+        return {
+            "user_id": user.user_id,
+            "email": user.email,
+            "firstname": user.first_name,
+            "lastname": user.last_name,
+            "role": user.role
+        }
+    return None
 
 def get_all_users():
     '''
     Get all users' roles for admin to manage
     '''
-    users = UserRole.query.join(User, User.user_id == UserRole.user_id, full=True).add_columns(
-        UserRole.user_id, User.first_name, User.last_name, UserRole.role, UserRole.in_lab_user
-    ).order_by(UserRole.id).all()
+    users = User.query.add_columns(User.row_id, User.user_id, User.first_name, User.last_name, User.email, User.role, User.in_lab_user).order_by(User.row_id).all()
     # Convert to objects with attributes for compatibility with the return statement
     class UserObj:
-        def __init__(self, user_id, first_name, last_name, role, in_lab_user):
+        def __init__(self, user_id, first_name, last_name, email, role, in_lab_user):
             self.user_id = user_id
             self.first_name = first_name
             self.last_name = last_name
+            self.email = email
             self.role = role
             self.in_lab_user = in_lab_user
 
-    users = [UserObj(user_id, first_name, last_name, role, in_lab_user) for _, user_id, first_name, last_name, role, in_lab_user in users]
+    users = [UserObj(user.user_id, user.first_name, user.last_name, user.email, user.role, user.in_lab_user) for user in users]
     return [{
         "user_id": user.user_id,
         "first_name": user.first_name,
         "last_name": user.last_name,
-        "role": user.role,
-        "in_lab_user": user.in_lab_user
+        "email": user.email,
+        "role": user.role if user.role else 'app_user',
+        "in_lab_user": user.in_lab_user if user.in_lab_user is not None else False
     } for user in users]
 
 

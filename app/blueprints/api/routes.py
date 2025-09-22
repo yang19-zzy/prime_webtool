@@ -7,7 +7,7 @@ from flask import (
 )
 from flask_login import current_user, login_required
 from app.extensions import db, get_redis, get_email_list
-from app.models import UserRole, MergeHistory
+from app.models import MergeHistory
 from app.utils.data_retriever import *
 from app.utils.merge_q_generator import merge_q_generator
 from app.utils.emailer import send_email
@@ -51,20 +51,14 @@ def list_users():
 @login_required
 def set_user_in_lab(user_id):
     # Logic to set user as in-lab or not
-    user = UserRole.query.filter_by(user_id=user_id).first()
+    # user = UserRole.query.filter_by(user_id=user_id).first()
+    user = User.query.filter_by(user_id=user_id).first()
     if not user:
         return jsonify({"message": "User not found"}), 404
     user.in_lab_user = not user.in_lab_user
     db.session.commit()
     return jsonify({"message": "User in-lab status updated"}), 200
 
-# Data Access Management
-# @api_bp.route("/user/schemas", methods=["GET"])
-# @login_required
-# def user_schemas():
-#     schemas = get_schemas_for_user(current_user.user_id)
-#     print(schemas)
-#     return jsonify({"available_schemas": schemas}), 200
 
 
 # Data Retrieval
@@ -123,14 +117,6 @@ def merge_data():
     db.session.commit()
     return jsonify({"message": "Merge successful", "redis_key": redis_key, 'query': sql_query}), 200
 
-# @api_bp.route("/data/action/download/<key>", methods=["GET"])
-# @login_required
-# def download_merged_data(key):
-#     redis_client = get_redis()
-#     merged_data = redis_client.get(key)
-#     if not merged_data:
-#         return jsonify({"error": "No merged data found"}), 404
-#     return jsonify({"data": py_json.loads(merged_data)}), 200
 
 @api_bp.route("/data/action/submit_tracker_form", methods=["POST"])
 @login_required

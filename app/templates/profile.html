@@ -8,26 +8,26 @@
 
 
 {% block content %}
-<div>
-     <div>
-        <h2>Profile</h2>
-        {% if not session.user_info %}
-            <p>Please log in first.</p>
-            <a href="{{ url_for('auth.auth_login', next=request.path, provider='google') }}"><button type="button" class="btn login-btn" id="login-btn">Log in</button></a>
-        
-        {% else %}
-            <div id="profile-container">
-                <!-- Populate user profile -->
-            </div>
+<div id="profile-section">
+    <h2>Profile</h2>
+    {% if not current_user.is_authenticated %}
+        <p>Please log in first.</p>
+        <a href="{{ url_for('auth.auth_login', next=request.path, provider='google') }}"><button type="button" class="btn login-btn" id="login-btn">Log in</button></a>
+    
+    {% else %}
+        <div id="profile-container">
+            <!-- Populate user profile -->
+        </div>
 
-            {% if session.user_role == 'admin' or session.user_role == 'dev' %}
-            <h2>Manage Users</h2>
-            <div id="profile-manage-container">
-                <!-- Populate profile manage tab dynamically -->
-            </div>
-            {% endif %}
+        {% if current_user.role in ['admin','dev'] %}
+        <h2>Manage Users</h2>
+        <div id="profile-manage-container">
+            <!-- Populate all user manage section -->
+        </div>
         {% endif %}
-    </div>
+
+    {% endif %}
 </div>
+
 
 {% endblock %}
