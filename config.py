@@ -24,7 +24,7 @@ if ENVIRONMENT == "production":
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         "execution_options": {"schema_translate_map": {None: "backend"}},
-        "pool_pre_ping": os.getenv("AWS_RDS_PG_POOL_PRE_PING", True),
+        "pool_pre_ping": os.getenv("AWS_RDS_PG_POOL_PRE_PING", "True").lower() == "true",
         "pool_recycle": int(os.environ.get("AWS_RDS_PG_POOL_RECYCLE", 1800)),
         "pool_size": int(os.environ.get("AWS_RDS_PG_POOL_SIZE", 5)),
         "pool_timeout": int(os.environ.get("AWS_RDS_PG_POOL_TIMEOUT", 30)),
