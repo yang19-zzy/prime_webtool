@@ -139,7 +139,7 @@ def db_test():
 
 @auth_bp.route("/session-check")
 def session_check():
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and current_user.user_id:
         return jsonify(
             {
                 "logged_in": True,
@@ -149,7 +149,7 @@ def session_check():
             }
         ), 200
     else:
-        return jsonify({"logged_in": False}), 200
+        return jsonify({"logged_in": False}), 403
 
 
 @login_manager.user_loader

@@ -24,7 +24,6 @@ class TestValidator {
                 }
             } else {
                 console.warn("Not logged in yet.");
-                this.validContainer.innerHTML = "<p class='info-msg'>Please log in to view validation requests.</p>";
             }
         } catch (error) {
             console.error("Initialization error:", error);
