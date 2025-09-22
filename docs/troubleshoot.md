@@ -109,7 +109,21 @@ chmod 600 <key-file-path>
 
 ---
 
-## Issue 7: 
+## Issue 7: Error when start a ssm-session
+
+**Description:**
+Error when start a ssm-session.
+
+**Solution:**
+1. make sure the IAM has the corrent trust relationship
+2. make sure the role is available through IMDSv2
+3. try fully stop and restart the jumper instance
+4. make sure the IAM role outbounds allow HTTP and HTTPS
+5. make sure the local port number is matched
+
+---
+
+## Issue 8: 
 
 > Add more issues as needed, following this format.
 
