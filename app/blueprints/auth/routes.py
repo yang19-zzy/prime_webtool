@@ -154,4 +154,11 @@ def session_check():
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.filter(User.user_id == user_id).first()
+    try:
+        # Try a simple query to check database connectivity
+        db.session.execute(text("SELECT 1"))
+        return User.query.filter(User.user_id == user_id).first()
+    except Exception as e:
+        current_app.logger.error(f"Database connection failed: {e}")
+        flask_session.clear()
+        return render_template("downtime_notice.html"), 503
