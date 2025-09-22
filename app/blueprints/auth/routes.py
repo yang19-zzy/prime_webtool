@@ -10,9 +10,10 @@ from flask import (
     render_template,
     current_app,
 )
-from app.extensions import get_google_flow, db, get_email_list
-from app.models import User, UserRole
-from sqlalchemy import text, inspect
+from flask_login import login_required, login_user, logout_user, current_user
+from app.extensions import get_google_flow, db, get_email_list, login_manager
+from app.models import *
+from sqlalchemy import text
 import requests
 import os
 
@@ -35,11 +36,19 @@ def auth_login():
 
 @auth_bp.route("/oauth2callback")
 def auth_callback():
+
+    # Try database connection before proceeding
+    try:
+        db.session.execute(text("SELECT 1"))
+    except Exception as db_exc:
+        current_app.logger.error(f"Database connection failed: {db_exc}")
+        flask_session.clear()
+        return render_template("downtime_notice.html"), 503
+    
     try:
         # Forcefully dispose stale connections (optional extra)
         db.engine.dispose()
 
-        # token = get_google().authorize_access_token()
         flow = get_google_flow()
         flow.fetch_token(authorization_response=request.url)
         creds = flow.credentials
@@ -51,7 +60,6 @@ def auth_callback():
             "client_secret": creds.client_secret,
             "scopes": creds.scopes,
         }
-        # flask_session['google_credentials'] = creds  #throws error of "TypeError: Object of type Credentials is not JSON serializable"
         userinfo_endpoint = "https://openidconnect.googleapis.com/v1/userinfo"
         resp = requests.get(
             userinfo_endpoint, headers={"Authorization": f"Bearer {creds.token}"}
@@ -61,29 +69,33 @@ def auth_callback():
         flask_session["user_info"] = user_info
         flask_session["user_id"] = user_info["user_id"]
 
-        # Check if the user is already in the database
-        # If not, create a new user
-        user = User.query.filter_by(user_id=user_info["user_id"]).first()
-        if not user:
-            user = User(
-                email=user_info["email"],
-                user_id=user_info["user_id"],
-                first_name=user_info["given_name"],
-                last_name=user_info["family_name"],
-            )
-            db.session.add(user)
-            db.session.commit()
+        user = None
+        try:
+            # Check if the user is already in the database
+            # If not, create a new user
+            user = User.query.filter_by(user_id=user_info["user_id"]).first()
+            if not user:
+                user = User(
+                    email=user_info["email"],
+                    user_id=user_info["user_id"],
+                    first_name=user_info["given_name"],
+                    last_name=user_info["family_name"],
+                    role="app_user",  # Default role
+                    in_lab_user=False  # Default in_lab_user status
+                )
+                db.session.add(user)
+                db.session.commit()
 
-        # check user role
-        user_role = UserRole.query.filter_by(user_id=user.user_id).first()
-        if not user_role:
-            user_role = UserRole(user_id=user.user_id, role="app_user")  # Default role
-            db.session.add(user_role)
-            db.session.commit()
+        except Exception as e:
+            current_app.logger.error(f"Error occurred while querying user info: {e}")
+            db.session.rollback()
+        # print("this is user-info!!!!!!!!!:", user_info)
 
-        flask_session["user_role"] = user_role.role
-        print("this is user-info!!!!!!!!!:", user_info)
+        # Ensure current_user is set after login
+        login_user(user)
+        current_app.logger.info(f"User {user_info['email']} logged in successfully.")
 
+        # Redirect to the next URL or home
         next_url = flask_session.pop("next_url", request.args.get("state", "/"))
         response = make_response(redirect(next_url))
         # response.set_cookie('logged_in', 'true', max_age=60*60, httponly=False, secure=True)
@@ -97,12 +109,20 @@ def auth_callback():
 
 
 @auth_bp.route("/logout")
+@login_required
 def auth_logout():
     # Clear user session and cookies
-    next_url = request.args.get("state") or request.referrer or "/"
+    # Determine where to redirect after logout
+    if "profile" in request.referrer:
+        next_url = url_for("main.index")
+    else:
+        next_url = request.referrer or "/"
     flask_session.clear()
+    logout_user()
     response = make_response(redirect(next_url))
-    # response.delete_cookie('logged_in')
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
     return response
 
 
@@ -119,14 +139,19 @@ def db_test():
 
 @auth_bp.route("/session-check")
 def session_check():
-    if "user_id" in flask_session:
+    if current_user.is_authenticated:
         return jsonify(
             {
                 "logged_in": True,
-                "user_id": flask_session["user_id"],
-                "user_role": flask_session["user_role"],
+                "user_id": current_user.user_id,
+                "user_role": current_user.role,
                 "email_list": get_email_list() or [],
             }
-        )
+        ), 200
     else:
-        return jsonify({'logged_in': False}), 401
+        return jsonify({"logged_in": False}), 200
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.filter(User.user_id == user_id).first()

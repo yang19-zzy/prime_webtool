@@ -2,14 +2,13 @@
 
 from flask import (
     render_template,
-    redirect,
-    url_for,
     request,
-    flash,
     session as flask_session,
 )
-from . import main_bp
 
+from . import main_bp
+from app.models import User
+from app.extensions import login_manager
 
 @main_bp.route("/")
 def index():
@@ -33,3 +32,5 @@ def get_session():
 @main_bp.route("/debug-url")
 def debug_url():
     return request.url
+
+

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}401 Unauthorized{% endblock %}
+
+{% block error %}
+<div class="error-401 error">
+    <h1>Unauthorized Access</h1>
+    <p>Your request could not be processed because you are not authorized to view this page (error 401).</p>
+    <p>Please log in with the correct credentials and try again.</p>
+    <a href="{{ url_for('main.index') }}">Return to homepage</a>
+</div>
+{% endblock %}
