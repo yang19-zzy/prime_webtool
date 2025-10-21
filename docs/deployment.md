@@ -60,3 +60,17 @@ Follow prompts to issue and auto-renew certificates.
 - `-d` specifies what domains to include in the certificate
 - `--agree-tos` automatically agree to Let's Encrypt's Terms of Service
 - `-m your@email.com`: email for important renewal/expiration notifications from Let's Encrypt
+
+
+
+## Deploy Staging Env
+1. Create a staging instance and a staging database
+```sh
+sudo dnf update -y
+sudo dnf install git docker -y
+```
+2. Clone git repository
+```sh
+git clone <webtool-repository>
+```
+3. 

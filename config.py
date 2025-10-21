@@ -73,11 +73,12 @@ GOOGLE_AUTH_PROVIDER = os.environ.get("GOOGLE_AUTH_PROVIDER")
 GOOGLE_TOKEN_URI = os.environ.get("GOOGLE_TOKEN_URI")
 GOOGLE_DISCOVERY_URL = os.environ.get("GOOGLE_DISCOVERY_URL")
 GOOGLE_SCOPES = os.environ.get("GOOGLE_SCOPES", "").split()
-GOOGLE_REDIRECT_URI = (
-    os.environ.get("GOOGLE_REDIRECT_URI_PROD")
-    if ENVIRONMENT == "production"
-    else os.environ.get("GOOGLE_REDIRECT_URI_DEV")
-)
+if ENVIRONMENT == "production":
+    GOOGLE_REDIRECT_URI = os.environ.get("GOOGLE_REDIRECT_URI_PROD")
+elif ENVIRONMENT == "staging":
+    GOOGLE_REDIRECT_URI = os.environ.get("GOOGLE_REDIRECT_URI_STAGING")
+else:
+    GOOGLE_REDIRECT_URI = os.environ.get("GOOGLE_REDIRECT_URI_DEV")
 
 GOOGLE_CLIENT_CONFIG = {
     "web": {
