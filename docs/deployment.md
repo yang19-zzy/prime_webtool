@@ -61,16 +61,53 @@ Follow prompts to issue and auto-renew certificates.
 - `--agree-tos` automatically agree to Let's Encrypt's Terms of Service
 - `-m your@email.com`: email for important renewal/expiration notifications from Let's Encrypt
 
+<br>
+<br>
 
-
-## Deploy Staging Env
+# Deploy Staging Env
 1. Create a staging instance and a staging database
-```sh
-sudo dnf update -y
-sudo dnf install git docker -y
-```
+2. Install essential elements
+      ```sh
+      sudo dnf update -y
+
+      # install git to clone repo
+      sudo dnf install git -y
+
+      # install docker
+      sudo dnf install docker -y
+      sudo systemctl enable docker
+      sudo systemctl start docker
+      sudo chkconfig docker on #make docker autostart
+      sudo usermod -aG docker $USER
+
+      # install docker compose -> https://medium.com/@fredmanre/how-to-configure-docker-docker-compose-in-aws-ec2-amazon-linux-2023-ami-ab4d10b2bcdc
+      #sudo dnf install docker-compose-plugin -y =>this raise error of "No match for argument"
+      sudo mkdir -p /usr/libexec/docker/cli-plugins/
+      sudo curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-$(uname -m) -o /usr/libexec/docker/cli-plugins/docker-compose
+      sudo chmod +x /usr/libexec/docker/cli-plugins/docker-compose
+      docker compose version
+      sudo chmod 666 /var/run/docker.sock #run this if "permission denied" when build
+      ```
 2. Clone git repository
-```sh
-git clone <webtool-repository>
-```
-3. 
+      ```sh
+      #rm -rf primr_webtool #run this if needed => remove existing directory
+      git clone --single-branch --branch <staging-branch-name> <webtool-repository-url>
+      ```
+3. Copy staing files to the instance
+      ```sh
+      scp -i </path/to/your-key-pair.pem> </path/to/local/file> ec2-user@ec2-3-218-226-67.compute-1.amazonaws.com:</path/to/remote/directory>
+      ```
+      - files should be:
+            - `.env`
+            - `docker-compose.yml`
+            - `Dockerfile`
+            - `nginx/nginx.conf`
+4. Generate a certificate
+      ```sh
+      sudo python3 -m venv /opt/certbot/
+      sudo /opt/certbot/bin/pip install --upgrade pip
+      sudo /opt/certbot/bin/pip install certbot certbot-nginx
+      sudo ln -s /opt/certbot/bin/certbot /usr/bin/certbot
+
+      sudo certbot --nginx
+      ```
