@@ -13,7 +13,7 @@ ENVIRONMENT = os.environ.get("FLASK_ENV", "development")
 # SQLALCHEMY_DATABASE_URI = URL.create("postgresql", username=os.getenv("AWS_RDS_PG_USER"), password=os.getenv("AWS_RDS_PG_PW"), host=os.getenv("AWS_RDS_PG_HOST"), port=os.getenv("AWS_RDS_PG_PORT"), database=os.getenv("AWS_RDS_PG_DB"))
 if ENVIRONMENT == "production":
     SQLALCHEMY_DATABASE_URI = (
-        "postgresql+psycopg2://{}:{}@{}:{}/{}?sslmode=require".format(
+        "postgresql+psycopg2://{}:{}@{}:{}/{}?sslmode=require&connect_timeout=3".format(
             os.getenv("AWS_RDS_PG_USER"),
             os.getenv("AWS_RDS_PG_PW"),
             os.getenv("AWS_RDS_PG_HOST"),
@@ -28,6 +28,7 @@ if ENVIRONMENT == "production":
         "pool_recycle": int(os.environ.get("AWS_RDS_PG_POOL_RECYCLE", 1800)),
         "pool_size": int(os.environ.get("AWS_RDS_PG_POOL_SIZE", 5)),
         "pool_timeout": int(os.environ.get("AWS_RDS_PG_POOL_TIMEOUT", 30)),
+        "connect_args": {"connect_timeout": 3},
     }
     SQLALCHEMY_DATABASE_POOL_SIZE = int(os.environ.get("AWS_RDS_PG_POOL_SIZE", 5))
     SQLALCHEMY_DATABASE_POOL_RECYCLE = int(
