@@ -109,5 +109,5 @@ Follow prompts to issue and auto-renew certificates.
       sudo /opt/certbot/bin/pip install certbot certbot-nginx
       sudo ln -s /opt/certbot/bin/certbot /usr/bin/certbot
 
-      sudo certbot --nginx
+      sudo certbot --nginx -d staging.prime.kines.umich.edu -d www.staging.prime.kines.umich.edu --agree-tos -m your@email.com
       ```
