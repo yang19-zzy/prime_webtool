@@ -45,10 +45,12 @@ def merge_q_generator(data):
         alias = f"t{alias_counter}"
         alias_counter += 1
 
+        id_col = "participant_ID" if "participant_ID" in cols else "subject_id"
+
         cols = [
             col
             for col in table_info["cols"]
-            if col not in ["participant_ID", "visit_date", "visit_type"]
+            if col not in [id_col,  "visit_date", "visit_type"]
         ]
         select_clauses += [
             (
@@ -62,15 +64,9 @@ def merge_q_generator(data):
         join_clause = (
             f"""
         LEFT JOIN {table_name} {alias}
-        ON {alias}."participant_ID" = {base_alias}."participant_ID"
-            AND {alias}."visit_date" = {base_alias}."visit_date"
+        ON {alias}."{id_col}" = {base_alias}."{id_col}"
+            AND CASE WHEN {alias}."visit_date" is not null and {base_alias}."visit_date" is not null THEN {alias}."visit_date" = {base_alias}."visit_date" ELSE TRUE END
             AND COALESCE({alias}."visit_type", '') = COALESCE({base_alias}."visit_type", '')
-        """
-            if "visit_type" in cols
-            else f"""
-        LEFT JOIN {table_name} {alias}
-        ON {alias}."participant_ID" = {base_alias}."participant_ID"
-            AND {alias}."visit_date" = {base_alias}."visit_date"
         """
         )
         join_clauses += join_clause
