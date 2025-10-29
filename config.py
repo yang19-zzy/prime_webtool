@@ -99,3 +99,6 @@ AWS_REGION = os.environ.get("AWS_REGION")
 AWS_BUCKET_NAME = os.environ.get("AWS_BUCKET_NAME")
 AWS_LAMBDA_PDF_EXTRACT = os.environ.get("AWS_LAMBDA_PDF_EXTRACT")
 AWS_LAMBDA_METADATA = json.loads(os.environ.get("AWS_LAMBDA_METADATA", "{}"))
+
+# Other configs
+DATA_VIEWER_DOCS_URL = os.environ.get("DATA_VIEWER_DOCS_URL", "")
