@@ -143,6 +143,9 @@ def create_app(test_config=None):
         "CACHE_REDIS_CLIENT": redis_client
     })
 
+    # other setup
+    app.config['OTHER_DATA_VIEWER_URL'] = os.environ.get("OTHER_DATA_VIEWER_URL", "#")
+
     # Register Blueprints
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
