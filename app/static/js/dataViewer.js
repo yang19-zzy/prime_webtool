@@ -372,7 +372,7 @@ class DataViewer {
       checkbox.checked = true;
 
       // Some columns should always be selected
-      if (["participant_ID", "visit_date", "visit_type", "row_id"].includes(col)) {
+      if (["participant_ID", "visit_date", "visit_type", "row_id", "subject_id"].includes(col)) {
         checkbox.disabled = true;
       }
 
