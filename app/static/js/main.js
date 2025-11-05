@@ -54,7 +54,7 @@ function createRowSelectElement(labelText, selectName, selectCls, className, isM
     if (isMulti) {
         elementSelect.multiple = isMulti;
         elementSelect.classList.add("multi-select");
-        elementSelect.size = 1; // make the dropdown box the same size as single select
+        elementSelect.size = 2; // make the dropdown box the same size as single select
         elementSelect.appendChild(addPlaceholder("Double click to modify selection", true));
         elementSelect.disabled = false;
     } else {
