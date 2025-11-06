@@ -458,7 +458,10 @@ class DataViewer {
         // console.log("Loading Dash frame with key:", result.redis_key);
         this.loadDashFrame(result.redis_key);
       })
-      .catch(error => console.error("Error during merge/download:", error));
+      .catch(error => {
+        console.error("Error during merge/download:", error);
+        alert("Something might be wrong. \nSorry for the inconvenience, but avoid selecting more than one table for now.");
+      });
 
     }
     
