@@ -236,29 +236,41 @@ button:hover {
   box-sizing: border-box;
 }
 
-.table-selection-row > .top {
+.table-selection-row {
   display: flex;
   flex-wrap: nowrap;
   width: 100%;
-  justify-content: space-evenly;
-  align-items: end;
-  border: none;
-  padding: none;
-  margin: none;
+  align-items: center;
+  margin: 2px;
+  gap: 10px
 }
 
-.table-selection-row > .bottom {
-  width: 100%;
-  display: block;
-  box-sizing: border-box;
+.table-selection-row > .table-select-dropdown {
+  flex: 12; /* Takes 3 units of space */
+  width: 0; /* Important: prevents content from forcing width beyond ratio */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.table-selection-row > .top > div,
-.table-selection-row > .bottom > div {
-  flex: 1 1 auto;
-  min-width: 200px;
-  margin: 5px 5px 0;
+.table-selection-row > .select-column-btn {
+  flex: 6; /* Takes 2 units of space */
+  min-width: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
+
+.table-selection-row > button {
+  flex: 1; /* Takes 1 unit of space */
+  width: 0;
+  /* Center text/icon */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
 .multi-select, .table-selection {
   appearance: none;       /* Removes native UI in some browsers */
   overflow-y: scroll;
@@ -323,7 +335,12 @@ button:hover {
 }
 
 #viewer-selection-container {
-  margin-bottom: 8px;
+  padding: 10px;
+  /* margin-bottom: 8px; */
+  height: 200px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  overflow-y: scroll;
 }
 
 #viewer-selection-container .choices {
@@ -600,3 +617,113 @@ input:checked + .slider:before {
     text-decoration: none;
     display: inline-block;
 } */
+
+
+
+#table-description-div {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  height: 400px;
+  width: 100%;
+  overflow-y: scroll;
+}
+
+#table-description-div table {
+  display:block;
+  /* overflow-y:scroll; */
+  height: 100%;
+  min-width: 500px;
+}
+
+#table-description-div table tr:hover {
+  background-color: #ddd;
+}
+#table-description-div table tbody input[type="checkbox"] {
+  height: 20px;
+}
+#table-description-div table tbody tr, #table-description-div table thead tr {
+  display: grid;
+  grid-template-columns: 4fr 1fr 2fr 8fr 1fr 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.table-intro-container {
+  display: flex;
+  justify-content: space-between;
+  flex: 1 2;
+  align-items: center;
+}
+
+#column-merge-confirm-div {
+  height: 180px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  width: 100%;
+  overflow-y: scroll;
+}
+
+#column-merge-confirm-div table {
+  display:block;
+  height: 100%;
+  width: 100%;
+  column-gap: 10px;
+  padding: 10px;
+}
+
+#column-merge-confirm-div table tbody tr, #column-merge-confirm-div table thead tr {
+  display: grid;
+  grid-template-columns: 3fr 4fr 2fr 2fr 2fr 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+#column-merge-confirm-div tbody tr:hover {
+  /* background-color: #edecec; */
+  box-shadow: 3px 3px 10px #4947479a;
+  border-radius: 5px;
+}
+
+#column-merge-confirm-div table tbody td{
+  height: fit-content;
+  /* width: 280px; */
+}
+
+
+
+#data-viewer-result-popup {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+#data-viewer-result-popup thead tr {
+  background: #f1f2f6;
+}
+#data-viewer-result-popup th, #data-viewer-result-popup td {
+  padding: 14px 12px;
+  text-align: left;
+}
+#data-viewer-result-popup th {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #47525e;
+  letter-spacing: 1px;
+  border-bottom: 2px solid #eaedef;
+}
+#data-viewer-result-popup tbody tr {
+  border-bottom: 1px solid #eaedef;
+  transition: background 0.16s;
+}
+#data-viewer-result-popup tbody tr:nth-child(even) {
+  background: #f9fafb;
+}
+#data-viewer-result-popup tbody tr:hover {
+  background: #e7eeff;
+}
+#data-viewer-result-popup td {
+  font-size: 0.98rem;
+  color: #364157;
+}

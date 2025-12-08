@@ -1,4 +1,5 @@
 # app/blueprints/api/routes.py
+from app.utils.merge_q_generator_new import merge_q_generator_new
 from . import api_bp
 from flask import (
     request,
@@ -83,6 +84,53 @@ def unvalidated_forms():
     return jsonify({"unvalidated_forms": forms}), 200
 
 
+@api_bp.route("/data/get/tables_desc/<proj>", methods=["GET"])
+@login_required
+def tables_desc(proj):
+    tables_description = get_tables_description(proj)
+    return jsonify({"tables_description": tables_description}), 200
+
+
+@api_bp.route("/data/get/merge_result/<key>", methods=["GET"])
+@login_required
+def get_merge_result(key):
+    redis_client = get_redis()
+    raw = redis_client.get(key)
+    if raw is None:
+        merged_data = []
+    else:
+        merged_data = json.loads(raw.decode("utf-8"))
+    return jsonify({"merged_data": merged_data}), 200
+
+@api_bp.route("/data/action/merge_with_key_cols", methods=["POST"])
+@login_required
+def merge_with_key_cols():
+    data = request.json
+    merged_key, final_sql_query = merge_q_generator_new(data)
+    redis_key = f"merged_data:{merged_key}"
+    redis_client = get_redis()
+    if not redis_client.exists(redis_key):  # if not in cache, query and store
+        result = db.session.execute(text(final_sql_query))
+        merged_data = [dict(row._mapping) for row in result.fetchall()]
+
+        serialized = json.dumps(merged_data, default=_json_serializer, sort_keys=False)
+        redis_client.setex(redis_key, 3600, serialized)
+    else:
+        raw = redis_client.get(redis_key)
+        if raw is None:
+            merged_data = []
+        else:
+            merged_data = json.loads(raw.decode("utf-8"))
+    history = MergeHistory(
+        user_id=current_user.user_id,
+        merged_key=merged_key,
+        selected_tables=json.dumps(data),
+    )
+    db.session.add(history)
+    db.session.commit()
+    return jsonify({"message": "Merge successful", "redis_key": redis_key, 'query': final_sql_query}), 200
+
+
 @api_bp.route("/data/action/merge", methods=["POST"])
 @login_required
 def merge_data():
@@ -154,3 +202,19 @@ def confirm_tracker_form():
     form.form_validator = current_user.user_id
     db.session.commit()
     return jsonify({"message": "Form validated successfully"}), 200
+
+
+
+
+# Data Viewer Static Page
+@api_bp.route("/data/get/data_viewer/init", methods=["GET"])
+@login_required
+def data_viewer_init():
+    table_options = get_column_options(current_user.user_id)
+    projects = table_options.keys()
+    tables_description = {proj:  get_tables_description(proj) for proj in projects}
+    return jsonify({
+        "projects": list(projects),
+        "table_select_options": table_options,
+        "tables_description": tables_description
+    }), 200

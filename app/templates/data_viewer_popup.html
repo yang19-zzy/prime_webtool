@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Merged Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- <script type = "text/javascript" src = "{{ url_for('static', filename = 'js/dataViewer_popup.js') }}" ></script> -->
+    <script type = "text/javascript" src = "{{ url_for('static', filename = 'js/download_csv.js') }}" ></script>
+</head>
+<body>
+    <h2>Merged Results</h2>
+    <button id="download-csv" style="margin-bottom: 10px;">Download as CSV</button>
+    <table border="1" id="data-viewer-result-popup">
+    
+        <thead>
+            <tr>
+                {% for key in results[0].keys() %}
+                <th>{{ key }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        {% for item in results %}
+        <tr>
+            {% for value in item.values() %}
+            <td>{{ value }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

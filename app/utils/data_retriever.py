@@ -79,6 +79,21 @@ def get_table_options(user_id):
     return grouped
 
 
+def get_column_options(user_id):
+    '''
+    Get column options for data-viewer
+    '''
+    user_schemas = get_schemas_for_user(user_id)
+    # Logic to retrieve column options
+    options = ColumnOptions.query.filter(ColumnOptions.project.in_(user_schemas)).order_by(
+        ColumnOptions.row_id, ColumnOptions.project, ColumnOptions.table_name, ColumnOptions.column_name
+    ).all()
+    grouped = defaultdict(lambda: defaultdict(list))
+    for opt in options:
+        grouped[opt.project][opt.table_name].append(opt.column_name)
+    return grouped
+
+
 def get_tracker_options(user_id):
     options = FormOptions.query.filter_by(active=True).order_by(
         FormOptions.field_name, FormOptions.item_num
@@ -103,5 +118,19 @@ def get_unvalidated_forms(user_id):
             },
         }
         for f in forms
+    ]
+    return data
+
+
+def get_tables_description(proj):
+    table_desc = TableDescription.query.filter_by(project=proj).order_by(TableDescription.table_name).all()
+    data = [
+        {
+            "table_name": t.table_name,
+            "table_type": t.table_type,
+            "key_columns": t.unique_keys,
+            "description": t.table_desc_short,
+        }
+        for t in table_desc
     ]
     return data
