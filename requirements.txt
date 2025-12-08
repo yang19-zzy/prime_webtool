@@ -17,9 +17,9 @@ psycopg2-binary  # keep if the app connects to Postgres
 boto3
 botocore
 
-# Dash feature
-dash
-plotly
+# # Dash feature
+# dash
+# plotly
 
 # Google login (used for login)
 google-auth

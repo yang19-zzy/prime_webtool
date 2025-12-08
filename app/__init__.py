@@ -29,7 +29,7 @@ from app.blueprints.viewer_new import viewer_bp_new
 
 from redis import Redis
 
-from app.dash_viewer.init_dash import init_dash as init_dash_viewer
+# from app.dash_viewer.init_dash import init_dash as init_dash_viewer
 
 
 def create_app(test_config=None):
@@ -92,8 +92,8 @@ def create_app(test_config=None):
     # )
     # set_lambda_client(lambda_client)
 
-    # Initialize Dash app
-    init_dash_viewer(app)
+    # # Initialize Dash app
+    # init_dash_viewer(app)
 
     # Initialize database
     db.init_app(app)
