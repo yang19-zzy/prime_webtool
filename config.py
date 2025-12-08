@@ -11,7 +11,7 @@ ENVIRONMENT = os.environ.get("FLASK_ENV", "development")
 
 # SQLAlchemy / DB
 # SQLALCHEMY_DATABASE_URI = URL.create("postgresql", username=os.getenv("AWS_RDS_PG_USER"), password=os.getenv("AWS_RDS_PG_PW"), host=os.getenv("AWS_RDS_PG_HOST"), port=os.getenv("AWS_RDS_PG_PORT"), database=os.getenv("AWS_RDS_PG_DB"))
-if ENVIRONMENT == "production":
+if ENVIRONMENT == "production" or ENVIRONMENT == "staging":
     SQLALCHEMY_DATABASE_URI = (
         "postgresql+psycopg2://{}:{}@{}:{}/{}?sslmode=require".format(
             os.getenv("AWS_RDS_PG_USER"),
@@ -34,7 +34,7 @@ if ENVIRONMENT == "production":
         os.environ.get("AWS_RDS_PG_POOL_RECYCLE", 1800)
     )
     
-elif ENVIRONMENT == "staging":
+elif ENVIRONMENT == "staging-local":
     SQLALCHEMY_DATABASE_URI = os.getenv("STAGING_DB_URI", "sqlite:///./test.db")
     SQLALCHEMY_ENGINE_OPTIONS = {
         "execution_options": {"schema_translate_map": {None: "backend"}}
