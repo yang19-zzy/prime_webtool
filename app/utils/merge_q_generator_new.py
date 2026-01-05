@@ -97,7 +97,7 @@ def merge_q_generator_new(data:dict={
         selected_cols += [f'{table_alias}."{c}"' for c in table["selected_cols"] if c not in [m1, m2, m3]]
         action = table["action"]
         if m2 and last_m2 and m3 and last_m3:
-            join_q += f"""\n{action.upper()} {table_name} AS t{idx} 
+            join_q += f"""\n{action.upper()} {table_name} AS {table_alias} 
             ON {last_m1} = {table_alias}."{m1}" 
             AND CAST({last_m2} AS DATE) = CAST({table_alias}."{m2}" AS DATE)
             AND {last_m3} = {table_alias}."{m3}" """
