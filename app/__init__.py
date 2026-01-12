@@ -25,6 +25,7 @@ from app.blueprints.tools import tools_bp
 from app.blueprints.tracker import tracker_bp
 from app.blueprints.validator import validator_bp
 from app.blueprints.viewer import viewer_bp
+from app.blueprints.viewer_new import viewer_bp_new
 
 from redis import Redis
 
@@ -150,6 +151,7 @@ def create_app(test_config=None):
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(viewer_bp)
+    app.register_blueprint(viewer_bp_new)
     app.register_blueprint(tracker_bp)
     app.register_blueprint(validator_bp)
     app.register_blueprint(tools_bp)

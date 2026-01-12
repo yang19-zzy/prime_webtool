@@ -27,7 +27,8 @@
         <h2>Menu</h2>
         <a href="{{ url_for('main.index') }}"><div class="menu__link">🏠 Home</div></a>
         <a href="{{ url_for('tracker.test_tracker') }}"><div class="menu__link">👣 Test Tracker</div></a>
-        <a href="{{ url_for('viewer.data_viewer') }}"><div class="menu__link">📋 Data Viewer</div></a>
+        <!-- <a href="{{ url_for('viewer.data_viewer') }}"><div class="menu__link">📋 Data Viewer</div></a> -->
+        <a href="{{ url_for('viewer_new.data_viewer_new') }}"><div class="menu__link">📋 Data Viewer</div></a>
         <a href="{{ url_for('tools.data_tools') }}"><div class="menu__link">⚙️ Tools</div></a>
         <a href="{{ url_for('validator.validate') }}"><div class="menu__link">⚠️ Test Validator</div></a>
         {% if session.user_info %}

@@ -30,6 +30,16 @@ class ViewerOptions(db.Model):
     column_name = db.Column(db.String(100), nullable=False)
 
 
+class ColumnOptions(db.Model):
+    __tablename__ = "column_options"
+    __table_args__ = {"schema": "backend"}
+
+    row_id = db.Column(db.Integer, primary_key=True)
+    project = db.Column(db.String(100), nullable=False)
+    table_name = db.Column(db.String(255), nullable=False)
+    column_name = db.Column(db.String(255), nullable=False)
+
+
 class MergeHistory(db.Model):
     __tablename__ = "viewer_merge_history"
     __table_args__ = {"schema": "backend"}
@@ -118,3 +128,19 @@ class UserSchemaAccess(db.Model):
 
     def __repr__(self):
         return f"<SchemaAccess {self.schema_name} - {self.limited_access}>"
+    
+
+
+class TableDescription(db.Model):
+    __tablename__ = "table_descriptions"
+    __table_args__ = {"schema": "backend"}
+
+    id = db.Column(db.Integer, primary_key=True)
+    project = db.Column(db.String(100), nullable=False)
+    table_name = db.Column(db.String(100), nullable=False)
+    table_type = db.Column(db.String(50), nullable=True)
+    unique_keys = db.Column(db.JSON, nullable=True)
+    table_desc_short = db.Column(db.Text, nullable=True)
+
+    def __repr__(self):
+        return f"<TableDescription {self.project} - {self.table_name}>"

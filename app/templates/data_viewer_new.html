@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Data Viewer New{% endblock %}
+
+{% block scripts %}
+<script type = "text/javascript" src = "{{ url_for('static', filename = 'js/dataViewer_new.js') }}" ></script>
+{% endblock %}
+
+{% block content %}
+<div>
+    <h2>Data Viewer</h2>
+    {% if not session.user_info %}
+
+        <p>Please log in first.</p>
+        <a href="{{ url_for('auth.auth_login', next=request.url, provider='google') }}"><button type="button" class="btn login-btn" id="login-btn">Log in</button></a>
+
+    {% else %}
+
+    
+    <div class="table-intro-container">
+        
+        <div id="project-selector" class="table-intro-sub-container-left">
+            <label for="project-select"><strong>Select Project:</strong></label>
+            <select id="project-select" name="project-select">
+                <option value="" disabled selected>Select a project</option>
+                <!-- dynamic project options will be populated here -->
+            </select>
+        </div>
+
+        <div class="table-intro-sub-container-right">
+            <div class="page-intro">
+                <strong>Instructions:</strong>
+                <li>Select a project from the dropdown menu,</li> 
+                <li>Check the tables you want to view (all columns are selected by default),</li>
+                <!-- <li>Add tables you want to view by clicking the "Add table" button,</li> -->
+                <!-- <li>Click to select columns to include in the view,</li> -->
+                 <!-- <li>(All columns are included by default)</li> -->
+                <li>Use the "Check Merge Logic" button to verify column merges,</li>
+                <li>Finally, click "Confirm & View Data" to load output.</li>
+            </div>
+        </div>
+
+        <div class="link-button-container" style="margin-bottom:1rem;">
+            <a href="{{ link_url or '#' }}" target="_blank" rel="noopener noreferrer" class="btn link-div" role="button" style="padding:10px 16px; background:#095bb4; color:#fff; text-align:center; text-decoration:none; border-radius:4px;">
+                <i class="fa fa-external-link" aria-hidden="true" style="margin-right:8px;"></i> Open Data Documentation
+            </a>
+        </div>
+    </div>
+    
+    <h3>Table Description</h3>
+    <p>Tables are aggregated at <strong>n</strong> level (<i>agg<strong>n</strong></i>): <strong>n</strong> of columns are used to identify a unique row.
+    <br><i> Please note that key identifiers may be different from project to project due to how projects are designed and data are collected.</i></p>
+    <div id="info-container">
+        <div id="table-description-div" class="info-sub-container-right">
+            <table class="table table-bordered" style="display:none;">
+                <thead>
+                    <tr style="background-color: rgb(236, 235, 235);">
+                        <th>Table Name</th>
+                        <th>Table Type</th>
+                        <th>Key Identifiers</th>
+                        <th>Description</th>
+                        <th>Select Table</th>
+                        <th>Make It Main Table</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- dynamic table description rows will be populated here -->
+                </tbody>
+            </table>
+        </div>
+        <button type="button" class="btn" id="check-merge-logic-btn">Check Merge Logic</button>
+    </div>
+    
+    <!-- <h3>Selected Tables</h3> -->
+    <!-- <div id="viewer-selection-container"> -->
+        <!-- dynamic table selection rows -->
+    <!-- </div> -->
+    <!-- <button type="button" class="btn add-btn" id="add-table-btn"><i class="fa fa-plus"></i> Add table</button> -->
+    
+    <h3>Column Merge Confirmation</h3>
+    <div id="column-merge-confirm-div">
+        <table class="table" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Table</th>
+                    <th>Selected Columns</th>
+                    <th>Key Identifier Group 1</th>
+                    <th>Key Identifier Group 2</th>
+                    <th>Key Identifier Group 3</th>
+                    <!-- <th>Key Columns Left</th> -->
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="target">
+                <!-- dynamic rows for drag and drop column merge confirmation -->
+            </tbody>
+        </table>
+    </div>
+
+    <button type="submit" class="btn submit-btn">Confirm & View Data</button>
+    
+    {% endif %}
+</div>
+{% endblock %}
