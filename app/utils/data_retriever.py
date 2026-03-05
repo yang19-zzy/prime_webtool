@@ -22,6 +22,18 @@ def get_schemas_for_user(user_id):
 
     return [i.schema_name for i in schemas]
 
+def get_schema_access_info(user_id):
+
+    schemas = UserGroups.query.add_columns(
+        UserGroups.group_id, UserGroups.user_id
+    ).join(
+        GroupProjectAccess, UserGroups.group_id == GroupProjectAccess.group_id, full=True
+    ).add_columns(
+        GroupProjectAccess.project_name, GroupProjectAccess.has_access
+    ).filter(UserGroups.user_id == user_id, GroupProjectAccess.has_access == True).all()
+
+    return [i.project_name for i in schemas]
+
 def get_profile_for_user(user_id):
     '''
     Get a user profile
@@ -93,7 +105,7 @@ def get_column_options(user_id):
     '''
     Get column options for data-viewer
     '''
-    user_schemas = get_schemas_for_user(user_id)
+    user_schemas = get_schema_access_info(user_id)
     # Logic to retrieve column options
     options = ColumnOptions.query.filter(ColumnOptions.project.in_(user_schemas)).order_by(
         ColumnOptions.row_id, ColumnOptions.project, ColumnOptions.table_name, ColumnOptions.column_name
