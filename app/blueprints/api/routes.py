@@ -77,9 +77,11 @@ def change_user_group():
         new_group_id = user.get("group_id")
         user = User.query.filter_by(user_id=user_id).first()
         user_group = UserGroups.query.filter_by(user_id=user_id).first()
-        # if not user or not user_group:
-        #     return jsonify({"message": "User or User Group not found"}), 404
-        user_group.group_id = new_group_id
+        if user and not user_group: # if user exists but no group, create new group entry
+            user_group = UserGroups(user_id=user_id, group_id=new_group_id)
+            db.session.add(user_group)
+        elif user and user_group: # if user and group both exist, update group
+            user_group.group_id = new_group_id
     db.session.commit()
     return jsonify({"message": "User group updated"}), 200
 
