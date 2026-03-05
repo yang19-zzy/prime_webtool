@@ -78,7 +78,7 @@ def change_user_group():
         user = User.query.filter_by(user_id=user_id).first()
         user_group = UserGroups.query.filter_by(user_id=user_id).first()
         if user and not user_group: # if user exists but no group, create new group entry
-            user_group = UserGroups(user_id=user_id, group_id=new_group_id)
+            user_group = UserGroups(user_id=user_id, group_id=new_group_id, added_at=datetime.now())
             db.session.add(user_group)
         elif user and user_group: # if user and group both exist, update group
             user_group.group_id = new_group_id
