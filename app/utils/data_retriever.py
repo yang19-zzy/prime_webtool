@@ -41,25 +41,35 @@ def get_all_users():
     '''
     Get all users' roles for admin to manage
     '''
-    users = User.query.add_columns(User.row_id, User.user_id, User.first_name, User.last_name, User.email, User.role, User.in_lab_user).order_by(User.last_name, User.first_name).all()
+    users = User.query.add_columns(
+        User.row_id, User.user_id, 
+        User.first_name, User.last_name, User.email, 
+        User.role, User.in_lab_user
+    ).join(
+            UserGroups, User.user_id == UserGroups.user_id
+    ).add_columns(
+        UserGroups.group_id
+    ).order_by(User.last_name, User.first_name).all()
     # Convert to objects with attributes for compatibility with the return statement
     class UserObj:
-        def __init__(self, user_id, first_name, last_name, email, role, in_lab_user):
+        def __init__(self, user_id, first_name, last_name, email, role, in_lab_user, group_id):
             self.user_id = user_id
             self.first_name = first_name
             self.last_name = last_name
             self.email = email
             self.role = role
             self.in_lab_user = in_lab_user
+            self.group_id = group_id
 
-    users = [UserObj(user.user_id, user.first_name, user.last_name, user.email, user.role, user.in_lab_user) for user in users]
+    users = [UserObj(user.user_id, user.first_name, user.last_name, user.email, user.role, user.in_lab_user, user.group_id) for user in users]
     return [{
         "user_id": user.user_id,
         "first_name": user.first_name,
         "last_name": user.last_name,
         "email": user.email,
         "role": user.role if user.role else 'app_user',
-        "in_lab_user": user.in_lab_user if user.in_lab_user is not None else False
+        "in_lab_user": user.in_lab_user if user.in_lab_user is not None else False,
+        "group_id": user.group_id
     } for user in users]
 
 
@@ -134,3 +144,25 @@ def get_tables_description(proj):
         for t in table_desc
     ]
     return data
+
+
+def get_group_project_access():
+    rows = GroupProjectAccess.query.all()
+    groups = {}
+    for row in rows:
+        if row.group_id not in groups:
+            groups[row.group_id] = {
+                "group_abbr": row.group_abbr,
+                "group_desc": row.group_desc,
+                "projects": {row.project_name: row.has_access}
+            }
+        groups[row.group_id]["projects"][row.project_name] = row.has_access
+    projects = ProjectSchemaList.query.all()
+    projects = [p.project_name for p in projects]
+    return groups, projects
+
+
+def get_user_groups(user_id):
+    rows = UserGroups.query.all()
+    groups = [row.group_id for row in rows]
+    return groups
