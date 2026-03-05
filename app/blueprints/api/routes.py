@@ -77,8 +77,8 @@ def change_user_group():
         new_group_id = user.get("group_id")
         user = User.query.filter_by(user_id=user_id).first()
         user_group = UserGroups.query.filter_by(user_id=user_id).first()
-        if not user or not user_group:
-            return jsonify({"message": "User or User Group not found"}), 404
+        # if not user or not user_group:
+        #     return jsonify({"message": "User or User Group not found"}), 404
         user_group.group_id = new_group_id
     db.session.commit()
     return jsonify({"message": "User group updated"}), 200
