@@ -46,7 +46,7 @@ def get_all_users():
         User.first_name, User.last_name, User.email, 
         User.role, User.in_lab_user
     ).join(
-            UserGroups, User.user_id == UserGroups.user_id
+            UserGroups, User.user_id == UserGroups.user_id, full=True
     ).add_columns(
         UserGroups.group_id
     ).order_by(User.last_name, User.first_name).all()
