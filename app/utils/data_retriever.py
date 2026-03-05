@@ -27,7 +27,7 @@ def get_schema_access_info(user_id):
     schemas = UserGroups.query.add_columns(
         UserGroups.group_id, UserGroups.user_id
     ).join(
-        GroupProjectAccess, UserGroups.group_id == GroupProjectAccess.group_id, full=True
+        GroupProjectAccess, UserGroups.group_id == GroupProjectAccess.group_id
     ).add_columns(
         GroupProjectAccess.project_name, GroupProjectAccess.has_access
     ).filter(UserGroups.user_id == user_id, GroupProjectAccess.has_access == True).all()

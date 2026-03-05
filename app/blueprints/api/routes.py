@@ -305,15 +305,6 @@ def send_contact_email():
     )
     return jsonify({"message": "Contact email sent successfully"}), 200
 
-
-from flask import request
-from werkzeug.utils import secure_filename
-
-from flask import request
-from werkzeug.utils import secure_filename
-from io import BytesIO
-import requests
-
 @api_bp.route("/v2/data/action/map_fmri", methods=["POST"])
 @login_required
 def map_fmri():
