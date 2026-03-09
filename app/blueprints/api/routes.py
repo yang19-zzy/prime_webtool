@@ -387,3 +387,8 @@ def test1():
         grouped[opt.project][opt.table_name].append(opt.column_name)
     projects = get_schema_access_info(current_user.user_id)
     return jsonify({'proj':projects,'groups':grouped})
+
+@api_bp.route("/force_db_refresh")
+def force_db_refresh():
+    db.session.expire_all()
+    return jsonify({"message": "Database session refreshed"}), 200
