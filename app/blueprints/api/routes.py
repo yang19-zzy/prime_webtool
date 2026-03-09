@@ -400,7 +400,7 @@ def force_db_refresh():
 
 @api_bp.route("/debug-raw")
 def debug_raw():
-    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    conn = psycopg2.connect(current_app.config['SQLALCHEMY_DATABASE_URI'])
     conn.autocommit = True
     cur = conn.cursor()
     cur.execute("SELECT distinct project FROM backend.column_options where project in ('aclr','sample');")
