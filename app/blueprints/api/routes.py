@@ -1,4 +1,8 @@
 # app/blueprints/api/routes.py
+import os
+
+import psycopg2
+
 from app.utils.merge_q_generator_new import merge_q_generator_new
 from . import api_bp
 from flask import (
@@ -381,14 +385,26 @@ def data_viewer_init():
 
 @api_bp.route("/test", methods=['GET'])
 def test1():
-    options = ColumnOptions.query.filter(ColumnOptions.project.in_(['aclr','sample'])).all()
-    grouped = defaultdict(lambda: defaultdict(list))
-    for opt in options:
-        grouped[opt.project][opt.table_name].append(opt.column_name)
-    projects = get_schema_access_info(current_user.user_id)
-    return jsonify({'proj':projects,'groups':grouped})
+    options = ColumnOptions.query.add_columns(ColumnOptions.project).filter(ColumnOptions.project.in_(['aclr','sample'])).distinct()
+    # grouped = defaultdict(lambda: defaultdict(list))
+    # for opt in options:
+    #     grouped[opt.project][opt.table_name].append(opt.column_name)
+    # projects = get_schema_access_info(current_user.user_id)
+    # return jsonify({'proj':projects,'groups':grouped})
+    return jsonify({'options': [o.project for o in options]})
 
 @api_bp.route("/force_db_refresh")
 def force_db_refresh():
     db.session.expire_all()
     return jsonify({"message": "Database session refreshed"}), 200
+
+@api_bp.route("/debug-raw")
+def debug_raw():
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    conn.autocommit = True
+    cur = conn.cursor()
+    cur.execute("SELECT distinct project FROM backend.column_options where project in ('aclr','sample');")
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    return jsonify([list(r) for r in rows])
