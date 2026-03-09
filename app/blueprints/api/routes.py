@@ -400,15 +400,7 @@ def force_db_refresh():
 
 @api_bp.route("/debug-raw")
 def debug_raw():
-    conn = psycopg2.connect(
-        host=os.getenv("AWS_RDS_PG_HOST"),
-        port=os.getenv("AWS_RDS_PG_PORT"),
-        dbname=os.getenv("AWS_RDS_PG_DB"),
-        user=os.getenv("AWS_RDS_PG_USER"),
-        password=os.getenv("AWS_RDS_PG_PW"),
-        connect_timeout=3,
-        sslmode='require'
-    )
+    conn = psycopg2.connect(current_app.config['SQLALCHEMY_DATABASE_URI'])
     conn.autocommit = True
     cur = conn.cursor()
     cur.execute("SELECT distinct project FROM backend.column_options where project in ('aclr','sample');")
