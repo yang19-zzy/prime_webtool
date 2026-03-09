@@ -25,7 +25,6 @@ import json
 import uuid
 from flask import current_app
 from io import BytesIO
-from werkzeug.utils import secure_filename
 
 
 def _json_serializer(obj):
@@ -313,61 +312,62 @@ def send_contact_email():
 @api_bp.route("/v2/data/action/map_fmri", methods=["POST"])
 @login_required
 def map_fmri():
-    # Get the uploaded file from the form
-    if 'file' not in request.files:
-        return jsonify({"error": "No file provided"}), 400
+    return jsonify({"message": "This is placeholder. fMRI mapping is not yet implemented.","job_id":"test123", "presigned_url":"https://example.com/download/test123.xlsx"}), 200
+    # # Get the uploaded file from the form
+    # if 'file' not in request.files:
+    #     return jsonify({"error": "No file provided"}), 400
     
-    file = request.files['file']
+    # file = request.files['file']
     
-    if file.filename == '':
-        return jsonify({"error": "No file selected"}), 400
+    # if file.filename == '':
+    #     return jsonify({"error": "No file selected"}), 400
     
-    # Validate file extension
-    if not file.filename.endswith(('.xlsx', '.xls')):
-        return jsonify({"error": "Only Excel files are allowed"}), 400
+    # # Validate file extension
+    # if not file.filename.endswith(('.xlsx', '.xls')):
+    #     return jsonify({"error": "Only Excel files are allowed"}), 400
     
-    # Logic to call AWS Lambda for fMRI mapping
-    s3 = get_s3()
-    s3_bucket = get_s3_bucket()
+    # # Logic to call AWS Lambda for fMRI mapping
+    # s3 = get_s3()
+    # s3_bucket = get_s3_bucket()
     
-    try:
-        job_id = str(uuid.uuid4())
+    # try:
+    #     job_id = str(uuid.uuid4())
         
-        # Read file content and wrap in BytesIO
-        file_content = file.read()
-        file_obj = BytesIO(file_content)
+    #     # Read file content and wrap in BytesIO
+    #     file_content = file.read()
+    #     file_obj = BytesIO(file_content)
         
-        s3.upload_fileobj(
-            Fileobj=file_obj,
-            Bucket=s3_bucket,
-            Key=f"uploads/{job_id}.xlsx",
-            ExtraArgs={
-            "Metadata": get_s3_metadata(),
-            "ContentType": file.content_type or 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            "ContentDisposition": f"attachment; filename={secure_filename(file.filename)}"
-            }
-        )
+    #     s3.upload_fileobj(
+    #         Fileobj=file_obj,
+    #         Bucket=s3_bucket,
+    #         Key=f"uploads/{job_id}.xlsx",
+    #         ExtraArgs={
+    #         "Metadata": get_s3_metadata(),
+    #         "ContentType": file.content_type or 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    #         "ContentDisposition": f"attachment; filename={secure_filename(file.filename)}"
+    #         }
+    #     )
         
 
-        presigned_url = s3.generate_presigned_url(
-            "get_object",
-            Params={
-                "Bucket": s3_bucket,
-                "Key": f"download/{job_id}.xlsx",
-                "ResponseContentDisposition": f"attachment; filename=\"{job_id}.xlsx\"",
-                "ResponseContentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            },
-            ExpiresIn=3600,  # 1 hour
-        )
+    #     presigned_url = s3.generate_presigned_url(
+    #         "get_object",
+    #         Params={
+    #             "Bucket": s3_bucket,
+    #             "Key": f"download/{job_id}.xlsx",
+    #             "ResponseContentDisposition": f"attachment; filename=\"{job_id}.xlsx\"",
+    #             "ResponseContentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    #         },
+    #         ExpiresIn=3600,  # 1 hour
+    #     )
 
-        return jsonify({
-            "message": "fMRI mapping initiated",
-            "job_id": job_id,
-            "presigned_url": presigned_url
-        }), 200
+    #     return jsonify({
+    #         "message": "fMRI mapping initiated",
+    #         "job_id": job_id,
+    #         "presigned_url": presigned_url
+    #     }), 200
         
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    # except Exception as e:
+    #     return jsonify({"error": str(e)}), 500
         
 
 # Data Viewer Static Page
@@ -382,29 +382,3 @@ def data_viewer_init():
         "table_select_options": table_options,
         "tables_description": tables_description,
     }), 200
-
-@api_bp.route("/test", methods=['GET'])
-def test1():
-    options = ColumnOptions.query.add_columns(ColumnOptions.project).filter(ColumnOptions.project.in_(['aclr','sample'])).distinct()
-    # grouped = defaultdict(lambda: defaultdict(list))
-    # for opt in options:
-    #     grouped[opt.project][opt.table_name].append(opt.column_name)
-    # projects = get_schema_access_info(current_user.user_id)
-    # return jsonify({'proj':projects,'groups':grouped})
-    return jsonify({'options': [o.project for o in options]})
-
-@api_bp.route("/force_db_refresh")
-def force_db_refresh():
-    db.session.expire_all()
-    return jsonify({"message": "Database session refreshed"}), 200
-
-@api_bp.route("/debug-raw")
-def debug_raw():
-    conn = psycopg2.connect(current_app.config['SQLALCHEMY_DATABASE_URI'])
-    conn.autocommit = True
-    cur = conn.cursor()
-    cur.execute("SELECT distinct project FROM backend.column_options where project in ('aclr','sample');")
-    rows = cur.fetchall()
-    cur.close()
-    conn.close()
-    return jsonify([list(r) for r in rows])
