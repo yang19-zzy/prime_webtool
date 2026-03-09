@@ -1,14 +1,11 @@
 # app/blueprints/api/routes.py
-import os
-
-import psycopg2
-
 from app.utils.merge_q_generator_new import merge_q_generator_new
 from . import api_bp
 from flask import (
     request,
     session as flask_session,
-    jsonify
+    jsonify,
+    current_app
 )
 from flask_login import current_user, login_required
 from app.extensions import db, get_redis, get_email_list, get_s3, get_s3_bucket, get_s3_metadata
@@ -23,8 +20,8 @@ from datetime import date, datetime
 from decimal import Decimal
 import json
 import uuid
-from flask import current_app
 from io import BytesIO
+from werkzeug.utils import secure_filename
 
 
 def _json_serializer(obj):
@@ -312,62 +309,61 @@ def send_contact_email():
 @api_bp.route("/v2/data/action/map_fmri", methods=["POST"])
 @login_required
 def map_fmri():
-    return jsonify({"message": "This is placeholder. fMRI mapping is not yet implemented.","job_id":"test123", "presigned_url":"https://example.com/download/test123.xlsx"}), 200
-    # # Get the uploaded file from the form
-    # if 'file' not in request.files:
-    #     return jsonify({"error": "No file provided"}), 400
+    # Get the uploaded file from the form
+    if 'file' not in request.files:
+        return jsonify({"error": "No file provided"}), 400
     
-    # file = request.files['file']
+    file = request.files['file']
     
-    # if file.filename == '':
-    #     return jsonify({"error": "No file selected"}), 400
+    if file.filename == '':
+        return jsonify({"error": "No file selected"}), 400
     
-    # # Validate file extension
-    # if not file.filename.endswith(('.xlsx', '.xls')):
-    #     return jsonify({"error": "Only Excel files are allowed"}), 400
+    # Validate file extension
+    if not file.filename.endswith(('.xlsx', '.xls')):
+        return jsonify({"error": "Only Excel files are allowed"}), 400
     
-    # # Logic to call AWS Lambda for fMRI mapping
-    # s3 = get_s3()
-    # s3_bucket = get_s3_bucket()
+    # Logic to call AWS Lambda for fMRI mapping
+    s3 = get_s3()
+    s3_bucket = get_s3_bucket()
     
-    # try:
-    #     job_id = str(uuid.uuid4())
+    try:
+        job_id = str(uuid.uuid4())
         
-    #     # Read file content and wrap in BytesIO
-    #     file_content = file.read()
-    #     file_obj = BytesIO(file_content)
+        # Read file content and wrap in BytesIO
+        file_content = file.read()
+        file_obj = BytesIO(file_content)
         
-    #     s3.upload_fileobj(
-    #         Fileobj=file_obj,
-    #         Bucket=s3_bucket,
-    #         Key=f"uploads/{job_id}.xlsx",
-    #         ExtraArgs={
-    #         "Metadata": get_s3_metadata(),
-    #         "ContentType": file.content_type or 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    #         "ContentDisposition": f"attachment; filename={secure_filename(file.filename)}"
-    #         }
-    #     )
+        s3.upload_fileobj(
+            Fileobj=file_obj,
+            Bucket=s3_bucket,
+            Key=f"uploads/{job_id}.xlsx",
+            ExtraArgs={
+            "Metadata": get_s3_metadata(),
+            "ContentType": file.content_type or 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            "ContentDisposition": f"attachment; filename={secure_filename(file.filename)}"
+            }
+        )
         
 
-    #     presigned_url = s3.generate_presigned_url(
-    #         "get_object",
-    #         Params={
-    #             "Bucket": s3_bucket,
-    #             "Key": f"download/{job_id}.xlsx",
-    #             "ResponseContentDisposition": f"attachment; filename=\"{job_id}.xlsx\"",
-    #             "ResponseContentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    #         },
-    #         ExpiresIn=3600,  # 1 hour
-    #     )
+        presigned_url = s3.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": s3_bucket,
+                "Key": f"download/{job_id}.xlsx",
+                "ResponseContentDisposition": f"attachment; filename=\"{job_id}.xlsx\"",
+                "ResponseContentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            },
+            ExpiresIn=3600,  # 1 hour
+        )
 
-    #     return jsonify({
-    #         "message": "fMRI mapping initiated",
-    #         "job_id": job_id,
-    #         "presigned_url": presigned_url
-    #     }), 200
+        return jsonify({
+            "message": "fMRI mapping initiated",
+            "job_id": job_id,
+            "presigned_url": presigned_url
+        }), 200
         
-    # except Exception as e:
-    #     return jsonify({"error": str(e)}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
         
 
 # Data Viewer Static Page
