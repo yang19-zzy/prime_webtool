@@ -146,6 +146,7 @@ def session_check():
                 "user_id": current_user.user_id,
                 "user_role": current_user.role,
                 "email_list": get_email_list() or [],
+                "in_lab_user": current_user.in_lab_user
             }
         ), 200
     else:
