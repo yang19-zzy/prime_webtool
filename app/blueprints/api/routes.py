@@ -69,13 +69,15 @@ def list_projects():
     groups, projects = get_group_project_access()
     return jsonify({"groups": groups, "projects": projects}), 200
 
-@api_bp.route("/admin/change_user_group", methods=["POST"])
+@api_bp.route("/admin/change_user_access", methods=["POST"])
 @login_required
-def change_user_group():
+def change_user_access():
+    """Admin can change user's group access and tool/feature access."""
     data = request.json
     for user in data['changed_users']:
         user_id = user.get("user_id")
         new_group_id = user.get("group_id")
+        in_lab_user = user.get("in_lab_user", False)
         user = User.query.filter_by(user_id=user_id).first()
         user_group = UserGroups.query.filter_by(user_id=user_id).first()
         if user and not user_group: # if user exists but no group, create new group entry
@@ -83,8 +85,10 @@ def change_user_group():
             db.session.add(user_group)
         elif user and user_group: # if user and group both exist, update group
             user_group.group_id = new_group_id
+        if user:
+            user.in_lab_user = in_lab_user
     db.session.commit()
-    return jsonify({"message": "User group updated"}), 200
+    return jsonify({"message": "User access updated"}), 200
 
 @api_bp.route("/admin/create_group", methods=["POST"])
 @login_required
