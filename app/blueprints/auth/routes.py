@@ -105,7 +105,7 @@ def auth_callback():
         db.session.rollback()
         user, user_info, user_role = None, None, None
         flask_session.clear()
-        return render_template("login_error.html"), 400
+        return jsonify({"error": "Authentication failed. Please try again."}), 400
 
 
 @auth_bp.route("/logout")
