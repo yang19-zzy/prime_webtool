@@ -158,9 +158,7 @@ def get_merge_result(key):
 @login_required
 def get_config():
     return jsonify({
-        "data_documentation_url": current_app.config.get('DATA_VIEWER_DOCS_URL'),
-        # "dyna_lambda_url": current_app.config.get('AWS_LAMBDA_PDF_EXTRACT'),
-        # "fmri_lambda_url": current_app.config.get('AWS_LAMBDA_FMRI_MAPPER'),
+        "data_documentation_url": current_app.config.get('DATA_VIEWER_DOCS_URL')
     }), 200
 
 @api_bp.route("/data/action/merge_with_key_cols", methods=["POST"])
