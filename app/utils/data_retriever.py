@@ -1,6 +1,7 @@
 # utils/schema_manager.py
 from collections import defaultdict
 from app.models import *
+from sqlalchemy import text
 
 # functions for profile management
 def get_schemas_for_user(user_id):
@@ -125,6 +126,13 @@ def get_tracker_options(user_id):
         grouped[opt.field_name][opt.value].append(opt.item_num)
     return grouped
 
+def get_form_options():
+    q = text("SELECT DISTINCT field_name, value FROM backend.form_options WHERE active = true and field_name IN ('test_type','device')")
+    result = db.session.execute(q)
+    grouped = defaultdict(list)
+    for row in result:
+        grouped[row[0]].append(row[1])
+    return grouped
 
 def get_unvalidated_forms(user_id):
     forms = TrackerForm.query.filter_by(validated=False).order_by(TrackerForm.id).all()

@@ -120,6 +120,11 @@ def tracker_options():
     options = get_tracker_options(current_user.user_id)
     return jsonify({"tracker_select_options": options}), 200
 
+@api_bp.route("/v2/data/form", methods=["GET"])
+@login_required
+def form_options():
+    options = get_form_options()
+    return jsonify({"form_options": options}), 200
 
 @api_bp.route("/data/get/unvalidated_forms", methods=["GET"])
 @login_required
