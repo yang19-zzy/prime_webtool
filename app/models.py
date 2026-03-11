@@ -144,3 +144,61 @@ class TableDescription(db.Model):
 
     def __repr__(self):
         return f"<TableDescription {self.project} - {self.table_name}>"
+    
+
+class ProjectSchemaList(db.Model):
+    """List of project and their associated schema names."""
+    __tablename__ = "project_schema_list"
+    __table_args__ = {"schema": "backend"}
+
+    project_id = db.Column(db.Integer, primary_key=True)
+    project_name = db.Column(db.String(100), nullable=False)
+    schema_name = db.Column(db.String(100), nullable=False)
+
+    def __repr__(self):
+        return f"<ProjectSchemaList {self.project_name} - {self.schema_name}>"
+    
+
+class GroupProjectAccess(db.Model):
+    """View of groups and their access to projects."""
+    __tablename__ = "group_project_access"
+    __table_args__ = {"schema": "backend"}
+
+    row_id = db.Column(db.Integer, primary_key=True)
+    group_id = db.Column(db.Integer, nullable=False)
+    group_abbr = db.Column(db.String(100), nullable=False)
+    project_name = db.Column(db.String(100), nullable=False)
+    group_desc = db.Column(db.String(255), nullable=True)
+    has_access = db.Column(db.Boolean, default=False)
+
+    def __repr__(self):
+        return f"<GroupProjectAccess {self.group_abbr} - {self.project_name}>"
+    
+
+class UserGroups(db.Model):
+    """Mapping of users to their groups."""
+    __tablename__ = "user_groups"
+    __table_args__ = {"schema": "backend"}
+
+    row_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(100), nullable=False)
+    group_id = db.Column(db.Integer, nullable=False)
+    added_at = db.Column(db.DateTime, nullable=False)
+    expired_at = db.Column(db.DateTime, nullable=True)
+
+    def __repr__(self):
+        return f"<UserGroups {self.user_id} - {self.group_id}>"
+    
+class Groups(db.Model):
+    """Definition of groups."""
+    __tablename__ = "groups"
+    __table_args__ = {"schema": "backend"}
+
+    group_id = db.Column(db.Integer, primary_key=True)
+    group_abbr = db.Column(db.String(100), nullable=False)
+    group_desc = db.Column(db.String(255), nullable=True)
+    created_on = db.Column(db.DateTime, nullable=False)
+    included_projects = db.Column(db.String(255), nullable=True)
+
+    def __repr__(self):
+        return f"<Groups {self.group_id} - {self.group_abbr}>"

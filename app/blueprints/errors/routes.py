@@ -1,25 +1,19 @@
 # app/blueprints/errors/routes.py
 from . import errors_bp
-from flask import (
-    app,
-    request,
-    redirect,
-    url_for,
-    session as flask_session,
-    make_response,
-    jsonify,
-    render_template,
-    current_app,
-)
+from flask import request, jsonify
 
 @errors_bp.app_errorhandler(404)
 def not_found(error):
-    return render_template("404.html"), 404
+    # If the request wants JSON (API clients), return JSON
+    if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
+        return jsonify({"error": "Not found", "status": 404}), 404
+    # For browser navigation (non-API), return JSON anyway so React handles it
+    return jsonify({"error": "Not found", "status": 404}), 404
 
 @errors_bp.app_errorhandler(500)
 def internal_error(error):
-    return render_template("500.html"), 500
+    return jsonify({"error": "Internal server error", "status": 500}), 500
 
 @errors_bp.app_errorhandler(400)
 def bad_request(error):
-    return render_template("400.html"), 400
+    return jsonify({"error": "Bad request", "status": 400}), 400

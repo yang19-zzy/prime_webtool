@@ -98,7 +98,6 @@ AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 AWS_REGION = os.environ.get("AWS_REGION")
 AWS_BUCKET_NAME = os.environ.get("AWS_BUCKET_NAME")
-AWS_LAMBDA_PDF_EXTRACT = os.environ.get("AWS_LAMBDA_PDF_EXTRACT")
 AWS_LAMBDA_METADATA = json.loads(os.environ.get("AWS_LAMBDA_METADATA", "{}"))
 
 # Other configs

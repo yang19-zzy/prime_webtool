@@ -43,8 +43,10 @@ def create_app(test_config=None):
 
     CORS(
         app,
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
         supports_credentials=True,
-        origins=["http://localhost", "https://prime.kines.umich.edu"],
+        max_age=3600,
     )
 
     # Initialize extensions
