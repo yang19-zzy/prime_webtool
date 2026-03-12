@@ -350,19 +350,12 @@ def map_fmri():
             "ContentDisposition": f"attachment; filename={secure_filename(file.filename)}"
             }
         )
-        
 
         presigned_url = s3.generate_presigned_url(
-            "get_object",
-            Params={
-                "Bucket": s3_bucket,
-                "Key": f"download/{job_id}.xlsx",
-                "ResponseContentDisposition": f"attachment; filename=\"{job_id}.xlsx\"",
-                "ResponseContentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            },
-            ExpiresIn=3600,  # 1 hour
+            ClientMethod='get_object',
+            Params={'Bucket': s3_bucket, 'Key': f"download/{job_id}.xlsx"},
+            ExpiresIn=3600  # URL valid for 1 hour
         )
-
         return jsonify({
             "message": "fMRI mapping initiated",
             "job_id": job_id,
@@ -372,6 +365,25 @@ def map_fmri():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
         
+@api_bp.route("/v2/data/action/check_s3_file", methods=["POST"])
+@login_required
+def check_s3_file():
+    data = request.json
+    key = data.get("key")
+    job_id = data.get("job_id")
+    s3 = get_s3()
+    try:
+        s3.head_object(Bucket=get_s3_bucket(), Key=key)
+        return jsonify({"exists": True}), 200
+    except s3.exceptions.ClientError as e:
+        code = (e.response or {}).get("Error", {}).get("Code", "")
+        if code in ("404", "NoSuchKey", "NotFound"):
+            return jsonify({"exists": False}), 404
+        # Unexpected S3 error – surface message
+        return jsonify({"status": "error", "message": str(e), "job_id": job_id, "ok": False}), 500
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e), "job_id": job_id, "ok": False}), 500
 
 # Data Viewer Static Page
 @api_bp.route("/data/get/data_viewer/init", methods=["GET"])
