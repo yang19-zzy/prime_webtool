@@ -75,6 +75,7 @@ def auth_callback():
             # If not, create a new user
             user = User.query.filter_by(user_id=user_info["user_id"]).first()
             if not user:
+                #create user
                 user = User(
                     email=user_info["email"],
                     user_id=user_info["user_id"],
@@ -84,6 +85,12 @@ def auth_callback():
                     in_lab_user=False  # Default in_lab_user status
                 )
                 db.session.add(user)
+                #assgin user to default group
+                user_group = UserGroups(
+                    user_id=user.user_id
+                )
+                db.session.add(user_group)
+
                 db.session.commit()
 
         except Exception as e:
