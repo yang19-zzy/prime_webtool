@@ -138,7 +138,50 @@ Getting 504 gateay time-out error after pushing the new release on prod. (Usuall
 
 ---
 
-## Issue 9: 
+## Issue 9: Update Domain Name
+
+**Description:**
+The elastic IP needs to be mapped to another domain name due to internal team decision.
+
+**Solution:**
+1. Log into instance
+2. Shut down Docker containers
+    - `docker-compose down --remove-orphans`
+3. Update files
+    - .env
+        - Update redirect url
+    -  docker-compose.yml
+        - Mount folder
+        - !!!! **DO NOT** mount files. It will create as folders, resulting certificate being a folder not a file and cause nginx container keeps restarting
+    - nginx.conf
+        - Update server name
+        - Comment out return 301, open http for generating certificate
+            - `location / { return 301 https://$host$request_uri; }`
+4. Copy files to instance
+5. Start nginx
+    - `docker-compose up -d nginx`
+6. Generate certificate
+    - `sudo certbot certonly --webroot -w /var/www/certbot -d <new domain name> --force-renewal`
+7. Confirm the key formats correctly. It should have `----BEGIN CERTIFICATE----`
+    - `sudo head -n 2 /path/to/certificate/key`
+8. Update nginx.conf
+    - Add back return 301 to secure https
+9. Update frontend
+    - Update redirect url on client.js
+    - Rebuild npm
+    - Copy files to instance 
+        - `scp -i -r /path/to/local/folder/* /var/www/frontend/`
+10. Restart or rebuild containers
+    - `docker-compose down --remove-orphans`
+    - `docker-compose -f docker-compose.yml up -d`
+11. Check containers status
+    - `docker ps`
+12. Remove old certificate if needed
+    - `sudo certbot delete`
+
+---
+
+## Issue 10:
 
 > Add more issues as needed, following this format.
 
