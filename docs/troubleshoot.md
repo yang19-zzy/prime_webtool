@@ -155,7 +155,7 @@ The elastic IP needs to be mapped to another domain name due to internal team de
         - !!!! **DO NOT** mount files. It will create as folders, resulting certificate being a folder not a file and cause nginx container keeps restarting
     - nginx.conf
         - Update server name
-        - Comment out return 301, open http for generating certificate
+        - Comment out return 301, open http for generating certificate; move route location under http
             - `location / { return 301 https://$host$request_uri; }`
 4. Copy files to instance
 5. Start nginx
